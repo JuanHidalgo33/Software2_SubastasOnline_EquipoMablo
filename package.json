@@ -1,0 +1,43 @@
+{
+  "name": "software2_subastasonline_equipomablo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/infrastructure/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/infrastructure/server.js",
+    "test": "jest --runInBand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanHidalgo33/Software2_SubastasOnline_EquipoMablo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/JuanHidalgo33/Software2_SubastasOnline_EquipoMablo/issues"
+  },
+  "homepage": "https://github.com/JuanHidalgo33/Software2_SubastasOnline_EquipoMablo#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "uuid": "^14.0.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.4.1",
+    "@types/uuid": "^10.0.0",
+    "jest": "^30.5.1",
+    "ts-jest": "^29.4.12",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^7.0.2"
+  }
+}
