@@ -21,6 +21,6 @@
 
     "sourceMap": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/domain/entities/Scratch-Auctions.ts", "src/domain/entities/Scratch-Auctions.ts"],
   "exclude": ["node_modules", "dist", "tests"]
 }
