@@ -29,12 +29,10 @@ entregas.
 **Instrucciones de compilación y ejecución:**
 ```bash
 git clone <https://github.com/JuanHidalgo33/Software2_SubastasOnline_EquipoMablo.git>
-cd subastas-online
+cd Software2_SubastasOnline_EquipoMablo
 npm install
-cp .env.example .env      # completar JWT_SECRET con cualquier texto largo
-npm install express jsonwebtoken bcryptjs uuid dotenv
-npm install -D typescript @types/node @types/express @types/jsonwebtoken @types/bcryptjs @types/uuid ts-node-dev jest ts-jest @types/jest
-npm run dev                # http://localhost:3000
+cp .env.example .env     
+npm run dev
 ```
 Para producción: `npm run build` y luego `npm start`.
 Para correr las pruebas: `npm test`.
@@ -69,7 +67,7 @@ src/
 ```
 
 Casi todas las reglas de negocio (publicación, pujas, cierre, cancelación)
-están concentradas en `src/domain/entities/Actuion.ts`.
+están concentradas en `src/domain/entities/Auction.ts`.
 ## Reglas de negocio principales
 
 - **Publicar subasta:** precio base e incremento mínimo mayores que cero;
@@ -105,5 +103,14 @@ Ver `.env.example`. Las importantes son `PORT`, `JWT_SECRET` (obligatoria),
 
 ## Branching y commits
 
-- `main` siempre debe quedar funcionando.
-- `branch` develope.
+- `main` siempre debe quedar en un estado ejecutable — nunca se hacen
+  cambios directos ahí.
+- El trabajo nuevo se hace en una rama, con el patrón
+  `tipo/descripcion-corta` (ej. `feat/publish-auction`,
+  `fix/closing-date-validation`), y se integra a `main` mediante Pull
+  Request.
+- Los mensajes de commit se escriben **en inglés, en pasado**, con un
+  prefijo que indica el tipo de cambio: `feat` (funcionalidad nueva),
+  `fix` (corrección), `test` (pruebas), `docs` (documentación),
+  `refactor` (cambio interno sin alterar el comportamiento).
+  Ejemplo: `feat: added minimum increment validation to placeBid`.
