@@ -28,7 +28,7 @@ entregas.
 
 **Instrucciones de compilación y ejecución:**
 ```bash
-git clone <https://github.com/JuanHidalgo33/Software2_SubastasOnline_EquipoMablo.git>
+git clone https://github.com/JuanHidalgo33/Software2_SubastasOnline_EquipoMablo.git
 cd Software2_SubastasOnline_EquipoMablo
 npm install
 cp .env.example .env     
@@ -90,9 +90,9 @@ Todas las rutas van bajo `/api`.
 
 | Recurso | Rutas |
 |---|---|
-| Usuarios / sesión | `POST /usuarios`, `POST /auth/login`, `GET /usuarios/perfil`  |
-| Categorías | `GET /categorias` |
-| Subastas | `POST /subastas` , `GET /subastas`, `GET /subastas/:id`, `POST /subastas/:id/cancelar` , `POST /subastas/:id/pujas`  |
+| Usuarios / sesión | `POST /users`, `POST /auth/login`, `GET /users/profile`  |
+| Categorías | `GET /categories` |
+| Subastas | `POST /auctions` , `GET /auctions`, `GET /auctions/:id`, `POST /auctions/:id/cancel` , `POST /subastas/:id/pujas`  |
 
 Detalle completo (cuerpos, respuestas, errores) en [`docs/API.md`](docs/API.md).
 
@@ -101,16 +101,69 @@ Detalle completo (cuerpos, respuestas, errores) en [`docs/API.md`](docs/API.md).
 Ver `.env.example`. Las importantes son `PORT`, `JWT_SECRET` (obligatoria),
 `JWT_EXPIRES_IN` y `BCRYPT_SALT_ROUNDS`.
 
-## Branching y commits
+## Flujo de trabajo con Git
 
-- `main` siempre debe quedar en un estado ejecutable — nunca se hacen
-  cambios directos ahí.
-- El trabajo nuevo se hace en una rama, con el patrón
-  `tipo/descripcion-corta` (ej. `feat/publish-auction`,
-  `fix/closing-date-validation`), y se integra a `main` mediante Pull
-  Request.
-- Los mensajes de commit se escriben **en inglés, en pasado**, con un
-  prefijo que indica el tipo de cambio: `feat` (funcionalidad nueva),
-  `fix` (corrección), `test` (pruebas), `docs` (documentación),
-  `refactor` (cambio interno sin alterar el comportamiento).
-  Ejemplo: `feat: added minimum increment validation to placeBid`.
+### Ramas
+
+- `main`: versión estable, siempre ejecutable. Está protegida en GitHub:
+  no acepta push directo ni force push, y solo recibe cambios mediante
+  Pull Request con al menos una aprobación del otro integrante.
+- Ramas de trabajo: se crean desde `main`, una por tarea, con el patrón
+  `tipo/descripcion-corta` en inglés y sin tildes:
+
+| Prefijo | Uso | Ejemplo |
+|---|---|---|
+| `feature/` | Funcionalidad nueva | `feature/websocket-subscriptions` |
+| `fix/` | Corrección de un error | `fix/closing-date-validation` |
+| `refactor/` | Cambio interno sin alterar el comportamiento | `refactor/auction-encapsulation` |
+| `docs/` | Documentación | `docs/openapi-swagger` |
+| `chore/` | Configuración, dependencias, scripts | `chore/update-dependencies` |
+| `release/` | Preparación de una entrega | `release/v2.0` |
+
+Las ramas se borran después de fusionarse.
+
+### Flujo de una tarea
+
+1. Actualizar `main`: `git switch main` y `git pull`.
+2. Crear la rama: `git switch -c feature/...`.
+3. Hacer commits pequeños y frecuentes, con `push` al final de cada sesión.
+4. Abrir un Pull Request hacia `main` y asignar al otro integrante como revisor.
+5. El revisor prueba la rama (`npm test` y `npm run build`), comenta y aprueba.
+6. El autor fusiona con *merge commit* (squash y rebase están deshabilitados
+   para conservar el historial completo de commits).
+
+### Convención de commits
+
+Seguimos [Conventional Commits](https://www.conventionalcommits.org/):
+mensajes en inglés, en minúscula y con el verbo en pasado, como indica
+la guía del curso.
+
+Formato: `<type>(<scope opcional>): <description>`
+
+| Tipo | Uso |
+|---|---|
+| `feat` | Funcionalidad nueva |
+| `fix` | Corrección de un error |
+| `test` | Pruebas nuevas o modificadas |
+| `docs` | Documentación |
+| `refactor` | Cambio interno sin alterar el comportamiento |
+| `chore` | Configuración, dependencias, scripts |
+
+Alcances sugeridos: `domain`, `application`, `http`, `ws`, `persistence`.
+
+Ejemplos:
+- `feat(domain): added minimum increment validation to placeBid`
+- `fix(http): returned 422 when a bid is rejected`
+- `test(domain): added tests for auction closing rules`
+
+No se aceptan mensajes genéricos (`changes`, `fix stuff`, `update`) ni
+commits que mezclen dos cambios: si el mensaje necesita un "and", son
+dos commits.
+
+El título del Pull Request sigue la misma convención. La descripción del
+PR y los comentarios de revisión se escriben en español.
+
+### Versiones
+
+Cada entrega se marca con una etiqueta anotada sobre `main`:
+`v1.0`, `v2.0`, `v3.0`.
