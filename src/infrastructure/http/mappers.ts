@@ -47,7 +47,6 @@ export function toAuctionResponse(auction: Auction) {
 }
 
 export function toUserResponse(user: User) {
-  // OJO: nunca incluir passwordHash aquí.
   return {
     id: user.id,
     name: user.name,
