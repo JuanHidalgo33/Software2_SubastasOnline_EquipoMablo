@@ -32,11 +32,10 @@ export class GetProfileUseCase {
     const publishedAuctions = allAuctions.filter((auction) => auction.sellerId === userId);
     const participatedAuctions = allAuctions.filter((auction) => auction.bids.some((bid) => bid.userId === userId));
 
-    // Cierre perezoso (seccion 4.4): consultar el perfil tambien consulta estas subastas.
     for (const auction of new Set([...publishedAuctions, ...participatedAuctions])) {
       await evaluateClosingIfNeeded(auction, this.auctionRepository, this.clock, this.idGenerator);
     }
-    
+
     return { user, publishedAuctions, participatedAuctions };
   }
 }
