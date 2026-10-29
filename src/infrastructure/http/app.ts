@@ -6,6 +6,8 @@ import { config } from '../config';
 import { errorHandler } from './middlewares/errorHandler';
 import { buildRouter, RouterDependencies } from './routes';
 
+export const API_PREFIX = '/api/v1';
+
 export function createApp(dependencies: RouterDependencies): Express {
   const app = express();
 
@@ -22,8 +24,12 @@ export function createApp(dependencies: RouterDependencies): Express {
   );
   app.use(express.json());
 
-  app.use('/api', buildRouter(dependencies));
+  app.use(API_PREFIX, buildRouter(dependencies));
 
-  app.use(errorHandler); 
+  app.use((_req, res) => {
+    res.status(404).json({ code: 'ROUTE_NOT_FOUND', message: 'The requested route does not exist.' });
+  });
+
+  app.use(errorHandler);
   return app;
 }
