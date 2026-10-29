@@ -43,6 +43,10 @@ describe('Auction.publish', () => {
     expect(() => publishTestAuction({ minIncrement: 0 })).toThrow('RN-01');
   });
 
+  it('rejects an invalid closing date (RN-01)', () => {
+    expect(() => publishTestAuction({ closesAt: new Date('not-a-date') })).toThrow('RN-01');
+  });
+  
   it('rejects a closing date before the publication date (RN-02)', () => {
     expect(() =>
       publishTestAuction({

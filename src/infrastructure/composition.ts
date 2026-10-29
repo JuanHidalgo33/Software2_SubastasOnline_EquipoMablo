@@ -32,7 +32,7 @@ export function buildApp() {
   return createApp({
     registerUserUseCase: new RegisterUserUseCase(userRepository, passwordHasher, idGenerator, clock),
     loginUseCase: new LoginUseCase(userRepository, passwordHasher, tokenService),
-    getProfileUseCase: new GetProfileUseCase(userRepository, auctionRepository),
+    getProfileUseCase: new GetProfileUseCase(userRepository, auctionRepository, clock, idGenerator),
     publishAuctionUseCase: new PublishAuctionUseCase(auctionRepository, categoryRepository, clock, idGenerator),
     listAuctionsUseCase: new ListAuctionsUseCase(auctionRepository, clock, idGenerator),
     getAuctionDetailUseCase: new GetAuctionDetailUseCase(auctionRepository, clock, idGenerator),
