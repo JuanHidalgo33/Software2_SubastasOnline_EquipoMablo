@@ -92,7 +92,7 @@ Todas las rutas van bajo `/api`.
 |---|---|
 | Usuarios / sesión | `POST /users`, `POST /auth/login`, `GET /users/profile`  |
 | Categorías | `GET /categories` |
-| Subastas | `POST /auctions` , `GET /auctions`, `GET /auctions/:id`, `POST /auctions/:id/cancel` , `POST /subastas/:id/pujas`  |
+| Subastas | `POST /auctions` , `GET /auctions`, `GET /auctions/:id`, `POST /auctions/:id/cancel` , `POST /auctions/:id/bids`  |
 
 Detalle completo (cuerpos, respuestas, errores) en [`docs/API.md`](docs/API.md).
 
