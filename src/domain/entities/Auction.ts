@@ -49,6 +49,10 @@ export class Auction {
       throw new DomainError('INVALID_MIN_INCREMENT', 'The minimum increment must be greater than zero (RN-01).');
     }
 
+    if (!(input.closesAt instanceof Date) || Number.isNaN(input.closesAt.getTime())) {
+      throw new DomainError('INVALID_CLOSING_DATE', 'The auction must have a valid closing date (RN-01).');
+    }
+
     if (input.closesAt.getTime() <= input.publishedAt.getTime()) {
       throw new DomainError('INVALID_CLOSING_DATE', 'The closing date must be after the publication date (RN-02).');
     }
