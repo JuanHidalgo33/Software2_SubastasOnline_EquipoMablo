@@ -1,7 +1,7 @@
 # Documentación de la API (Entrega 1)
 
 Esta es una API REST: el cliente pregunta y el servidor responde (ver
-sección 4.6 del enunciado). Todas las rutas están bajo el prefijo `/api`.
+sección 4.6 del enunciado). Todas las rutas están bajo el prefijo `/api/v1`.
 
 Toda respuesta de error tiene esta forma (RNF-13):
 
@@ -16,7 +16,7 @@ Las rutas marcadas con 🔒 requieren el encabezado
 
 ## Usuarios y sesión
 
-### `POST /api/users` — Registrar un usuario (RF-01)
+### `POST /api/v1/users` — Registrar un usuario (RF-01)
 
 Cuerpo:
 \`\`\`json
@@ -30,7 +30,7 @@ Respuesta `201`:
 
 Errores posibles: `INVALID_EMAIL` (400), `EMAIL_ALREADY_REGISTERED` (400, RN-22).
 
-### `POST /api/auth/login` — Iniciar sesión (RF-02)
+### `POST /api/v1/auth/login` — Iniciar sesión (RF-02)
 
 Cuerpo:
 \`\`\`json
@@ -44,7 +44,7 @@ Respuesta `200`:
 
 Errores posibles: `INVALID_CREDENTIALS` (401).
 
-### `GET /api/users/profile` 🔒 — Perfil del usuario autenticado (RF-03)
+### `GET /api/v1/users/profile` 🔒 — Perfil del usuario autenticado (RF-03)
 
 Respuesta `200`:
 \`\`\`json
@@ -61,7 +61,7 @@ Errores posibles: `UNAUTHENTICATED` (401).
 
 ## Categorías
 
-### `GET /api/categories` — Listar categorías (apoya el filtro de RF-05)
+### `GET /api/v1/categories` — Listar categorías (apoya el filtro de RF-05)
 
 Respuesta `200`:
 \`\`\`json
@@ -94,7 +94,7 @@ Formato de una subasta en las respuestas:
 
 `status` es uno de: `OPEN`, `CANCELLED`, `AWARDED`, `UNSOLD`.
 
-### `POST /api/auctions` 🔒 — Publicar una subasta (RF-04)
+### `POST /api/v1/auctions` 🔒 — Publicar una subasta (RF-04)
 
 Cuerpo:
 \`\`\`json
@@ -113,7 +113,7 @@ Errores posibles: `INVALID_BASE_PRICE`, `INVALID_MIN_INCREMENT`,
 `INVALID_CLOSING_DATE`, `INVALID_DURATION` (todos 400, RN-01 a RN-03),
 `RESOURCE_NOT_FOUND` (404, si la categoría no existe).
 
-### `GET /api/auctions` — Listar subastas, con filtros (RF-05)
+### `GET /api/v1/auctions` — Listar subastas, con filtros (RF-05)
 
 Parámetros de consulta, todos opcionales: `categoryId`, `status`
 (`OPEN`/`CANCELLED`/`AWARDED`/`UNSOLD`), `page` (por defecto 1),
@@ -124,14 +124,14 @@ Respuesta `200`:
 { "items": [ /* subastas */ ], "page": 1, "pageSize": 10, "totalItems": 3, "totalPages": 1 }
 \`\`\`
 
-### `GET /api/auctions/:id` — Detalle de una subasta (RF-06)
+### `GET /api/v1/auctions/:id` — Detalle de una subasta (RF-06)
 
 Respuesta `200`: la subasta (formato de arriba). Cada consulta evalúa si la
 subasta ya debe cerrarse (cierre perezoso, RN-13/RN-14/RN-16).
 
 Errores posibles: `RESOURCE_NOT_FOUND` (404).
 
-### `POST /api/auctions/:id/cancel` 🔒 — Cancelar una subasta (RF-07)
+### `POST /api/v1/auctions/:id/cancel` 🔒 — Cancelar una subasta (RF-07)
 
 Solo el vendedor que la publicó puede cancelarla, y solo si aún no tiene
 pujas (RN-04). Respuesta `204` (sin contenido) si se pudo cancelar.
@@ -139,7 +139,7 @@ pujas (RN-04). Respuesta `204` (sin contenido) si se pudo cancelar.
 Errores posibles: `RESOURCE_NOT_FOUND` (404), `FORBIDDEN` (403, si quien
 pide la cancelación no es el vendedor), `AUCTION_NOT_CANCELLABLE` (400).
 
-### `POST /api/auctions/:id/bids` 🔒 — Registrar una puja (RF-09, RF-10, RF-11)
+### `POST /api/v1/auctions/:id/bids` 🔒 — Registrar una puja (RF-09, RF-10, RF-11)
 
 Cuerpo:
 \`\`\`json
