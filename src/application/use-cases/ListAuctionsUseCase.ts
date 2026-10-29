@@ -2,6 +2,7 @@ import { Auction, AuctionStatus } from '../../domain/entities/Auction';
 import { AuctionRepository } from '../../domain/ports/AuctionRepository';
 import { Clock } from '../../domain/ports/Clock';
 import { IdGenerator } from '../../domain/ports/IdGenerator';
+import { AuctionEventPublisher } from '../ports/AuctionEventPublisher';
 import { evaluateClosingIfNeeded } from './EvaluateClosingIfNeeded';
 
 export interface ListAuctionsInput {
@@ -24,13 +25,19 @@ export class ListAuctionsUseCase {
     private readonly auctionRepository: AuctionRepository,
     private readonly clock: Clock,
     private readonly idGenerator: IdGenerator,
+    private readonly eventPublisher: AuctionEventPublisher,
   ) {}
 
   async execute(input: ListAuctionsInput): Promise<PagedResult<Auction>> {
     const allAuctions = await this.auctionRepository.findAll();
 
     for (const auction of allAuctions) {
-      await evaluateClosingIfNeeded(auction, this.auctionRepository, this.clock, this.idGenerator);
+      await evaluateClosingIfNeeded(auction, {
+        auctionRepository: this.auctionRepository,
+        clock: this.clock,
+        idGenerator: this.idGenerator,
+        eventPublisher: this.eventPublisher,
+      });
     }
 
     const filtered = allAuctions.filter((auction) => {

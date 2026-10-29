@@ -3,6 +3,7 @@ import { AuctionRepository } from '../../domain/ports/AuctionRepository';
 import { Clock } from '../../domain/ports/Clock';
 import { IdGenerator } from '../../domain/ports/IdGenerator';
 import { ApplicationError } from '../errors/ApplicationError';
+import { AuctionEventPublisher } from '../ports/AuctionEventPublisher';
 import { evaluateClosingIfNeeded } from './EvaluateClosingIfNeeded';
 
 export class GetAuctionDetailUseCase {
@@ -10,6 +11,7 @@ export class GetAuctionDetailUseCase {
     private readonly auctionRepository: AuctionRepository,
     private readonly clock: Clock,
     private readonly idGenerator: IdGenerator,
+    private readonly eventPublisher: AuctionEventPublisher,
   ) {}
 
   async execute(auctionId: string): Promise<Auction> {
@@ -17,7 +19,12 @@ export class GetAuctionDetailUseCase {
     if (!auction) {
       throw new ApplicationError('RESOURCE_NOT_FOUND', 'Auction not found.', 404);
     }
-    await evaluateClosingIfNeeded(auction, this.auctionRepository, this.clock, this.idGenerator);
+    await evaluateClosingIfNeeded(auction, {
+      auctionRepository: this.auctionRepository,
+      clock: this.clock,
+      idGenerator: this.idGenerator,
+      eventPublisher: this.eventPublisher,
+    });
     return auction;
   }
 }
