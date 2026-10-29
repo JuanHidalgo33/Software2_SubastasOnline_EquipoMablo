@@ -13,4 +13,7 @@ export const config = {
   jwtSecret: required('JWT_SECRET'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '2h',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS ?? 10),
+  corsOrigin: process.env.CORS_ORIGIN ?? '*',
+  rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1000),
+  rateLimitMax: Number(process.env.RATE_LIMIT_MAX ?? 100),
 };
