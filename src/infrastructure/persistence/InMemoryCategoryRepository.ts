@@ -1,7 +1,7 @@
 import { Category } from '../../domain/entities/Category';
 import { CategoryRepository } from '../../domain/ports/CategoryRepository';
 
-const SEED_CATEGORIES: Category[] = [
+export const SEED_CATEGORIES: Category[] = [
   { id: 'cat-electronics', name: 'Electronics' },
   { id: 'cat-home', name: 'Home' },
   { id: 'cat-vehicles', name: 'Vehicles' },
