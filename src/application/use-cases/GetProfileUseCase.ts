@@ -5,6 +5,7 @@ import { AuctionRepository } from '../../domain/ports/AuctionRepository';
 import { Clock } from '../../domain/ports/Clock';
 import { IdGenerator } from '../../domain/ports/IdGenerator';
 import { ApplicationError } from '../errors/ApplicationError';
+import { AuctionEventPublisher } from '../ports/AuctionEventPublisher';
 import { evaluateClosingIfNeeded } from './EvaluateClosingIfNeeded';
 
 export interface ProfileResult {
@@ -19,6 +20,7 @@ export class GetProfileUseCase {
     private readonly auctionRepository: AuctionRepository,
     private readonly clock: Clock,
     private readonly idGenerator: IdGenerator,
+    private readonly eventPublisher: AuctionEventPublisher,
   ) {}
 
   async execute(userId: string): Promise<ProfileResult> {
@@ -33,7 +35,12 @@ export class GetProfileUseCase {
     const participatedAuctions = allAuctions.filter((auction) => auction.bids.some((bid) => bid.userId === userId));
 
     for (const auction of new Set([...publishedAuctions, ...participatedAuctions])) {
-      await evaluateClosingIfNeeded(auction, this.auctionRepository, this.clock, this.idGenerator);
+      await evaluateClosingIfNeeded(auction, {
+        auctionRepository: this.auctionRepository,
+        clock: this.clock,
+        idGenerator: this.idGenerator,
+        eventPublisher: this.eventPublisher,
+      });
     }
 
     return { user, publishedAuctions, participatedAuctions };

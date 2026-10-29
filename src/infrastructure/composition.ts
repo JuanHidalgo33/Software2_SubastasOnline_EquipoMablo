@@ -17,11 +17,13 @@ import { CancelAuctionUseCase } from '../application/use-cases/CancelAuctionUseC
 import { PlaceBidUseCase } from '../application/use-cases/PlaceBidUseCase';
 import { ListCategoriesUseCase } from '../application/use-cases/ListCategoriesUseCase';
 
+import { ConsoleEventPublisher } from './events/ConsoleEventPublisher';
 import { createApp } from './http/app';
 
 export function buildApp() {
   const clock = new SystemClock();
   const idGenerator = new UuidIdGenerator();
+  const eventPublisher = new ConsoleEventPublisher();
   const passwordHasher = new BcryptPasswordHasher(config.bcryptSaltRounds);
   const tokenService = new JwtTokenService(config.jwtSecret, config.jwtExpiresIn);
 
@@ -32,12 +34,12 @@ export function buildApp() {
   return createApp({
     registerUserUseCase: new RegisterUserUseCase(userRepository, passwordHasher, idGenerator, clock),
     loginUseCase: new LoginUseCase(userRepository, passwordHasher, tokenService),
-    getProfileUseCase: new GetProfileUseCase(userRepository, auctionRepository, clock, idGenerator),
+    getProfileUseCase: new GetProfileUseCase(userRepository, auctionRepository, clock, idGenerator, eventPublisher),
     publishAuctionUseCase: new PublishAuctionUseCase(auctionRepository, categoryRepository, clock, idGenerator),
-    listAuctionsUseCase: new ListAuctionsUseCase(auctionRepository, clock, idGenerator),
-    getAuctionDetailUseCase: new GetAuctionDetailUseCase(auctionRepository, clock, idGenerator),
-    cancelAuctionUseCase: new CancelAuctionUseCase(auctionRepository, idGenerator, clock),
-    placeBidUseCase: new PlaceBidUseCase(auctionRepository, idGenerator, clock),
+    listAuctionsUseCase: new ListAuctionsUseCase(auctionRepository, clock, idGenerator, eventPublisher),
+    getAuctionDetailUseCase: new GetAuctionDetailUseCase(auctionRepository, clock, idGenerator, eventPublisher),
+    cancelAuctionUseCase: new CancelAuctionUseCase(auctionRepository, idGenerator, clock, eventPublisher),
+    placeBidUseCase: new PlaceBidUseCase(auctionRepository, idGenerator, clock, eventPublisher),
     listCategoriesUseCase: new ListCategoriesUseCase(categoryRepository),
     tokenService,
   });
