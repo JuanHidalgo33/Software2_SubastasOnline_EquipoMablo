@@ -6,6 +6,10 @@ import { JwtTokenService } from './security/JwtTokenService';
 import { InMemoryUserRepository } from './persistence/InMemoryUserRepository';
 import { InMemoryAuctionRepository } from './persistence/InMemoryAuctionRepository';
 import { InMemoryCategoryRepository } from './persistence/InMemoryCategoryRepository';
+import { openDatabase } from './persistence/sqlite/database';
+import { SqliteUserRepository } from './persistence/sqlite/SqliteUserRepository';
+import { SqliteAuctionRepository } from './persistence/sqlite/SqliteAuctionRepository';
+import { SqliteCategoryRepository } from './persistence/sqlite/SqliteCategoryRepository';
 
 import { RegisterUserUseCase } from '../application/use-cases/RegisterUserUseCase';
 import { LoginUseCase } from '../application/use-cases/LoginUseCase';
@@ -23,19 +27,37 @@ import { CompositeEventPublisher } from './events/CompositeEventPublisher';
 import { AuctionRealtimeHub } from './realtime/AuctionRealtimeHub';
 import { createApp } from './http/app';
 
+
+function buildRepositories() {
+  if (config.persistence === 'memory') {
+    return {
+      userRepository: new InMemoryUserRepository(),
+      auctionRepository: new InMemoryAuctionRepository(),
+      categoryRepository: new InMemoryCategoryRepository(),
+    };
+  }
+
+  const db = openDatabase(config.databasePath);
+  return {
+    userRepository: new SqliteUserRepository(db),
+    auctionRepository: new SqliteAuctionRepository(db),
+    categoryRepository: new SqliteCategoryRepository(db),
+  };
+}
+
 export function buildApp() {
   const clock = new SystemClock();
   const idGenerator = new UuidIdGenerator();
   const passwordHasher = new BcryptPasswordHasher(config.bcryptSaltRounds);
   const tokenService = new JwtTokenService(config.jwtSecret, config.jwtExpiresIn);
+
   const realtimeHub = new AuctionRealtimeHub(tokenService);
   const eventPublisher = new CompositeEventPublisher([
     new ConsoleEventPublisher(),
     new WebSocketEventPublisher(realtimeHub, idGenerator),
   ]);
-  const userRepository = new InMemoryUserRepository();
-  const auctionRepository = new InMemoryAuctionRepository();
-  const categoryRepository = new InMemoryCategoryRepository();
+
+  const { userRepository, auctionRepository, categoryRepository } = buildRepositories();
 
   const app = createApp({
     registerUserUseCase: new RegisterUserUseCase(userRepository, passwordHasher, idGenerator, clock),
@@ -50,6 +72,5 @@ export function buildApp() {
     tokenService,
   });
 
-  
   return { app, realtimeHub };
 }
