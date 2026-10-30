@@ -2,7 +2,7 @@ import { Auction } from '../../domain/entities/Auction';
 import { AuctionRepository } from '../../domain/ports/AuctionRepository';
 import { Clock } from '../../domain/ports/Clock';
 import { IdGenerator } from '../../domain/ports/IdGenerator';
-import { AuctionEventPublisher } from '../ports/AuctionEventPublisher';
+import { AuctionClosedEvent, AuctionEventPublisher } from '../ports/AuctionEventPublisher';
 
 export interface ClosingDependencies {
   auctionRepository: AuctionRepository;
@@ -14,17 +14,12 @@ export interface ClosingDependencies {
 export async function evaluateClosingIfNeeded(auction: Auction, deps: ClosingDependencies): Promise<void> {
   const statusBefore = auction.status;
   const now = deps.clock.now();
+
   auction.evaluateClosing(now, () => deps.idGenerator.generate());
-
-  if (auction.status === statusBefore) {
-    return;
-  }
-
-  await deps.auctionRepository.save(auction);
-
-  if (auction.status === 'AWARDED' || auction.status === 'UNSOLD') {
+  let closedEvent: AuctionClosedEvent | undefined;
+  if (statusBefore === 'OPEN' && (auction.status === 'AWARDED' || auction.status === 'UNSOLD')) {
     const winningBid = auction.currentBid();
-    await deps.eventPublisher.publish({
+    closedEvent = {
       type: 'AUCTION_CLOSED',
       auctionId: auction.id,
       sellerId: auction.sellerId,
@@ -33,6 +28,18 @@ export async function evaluateClosingIfNeeded(auction: Auction, deps: ClosingDep
       winningAmount: winningBid ? winningBid.amount.value : null,
       paymentOrderId: auction.paymentOrder ? auction.paymentOrder.id : null,
       occurredAt: now,
-    });
+    };
+  }
+
+  auction.evaluatePaymentDeadline(now);
+
+  if (auction.status === statusBefore) {
+    return;
+  }
+
+  await deps.auctionRepository.save(auction);
+
+  if (closedEvent) {
+    await deps.eventPublisher.publish(closedEvent);
   }
 }

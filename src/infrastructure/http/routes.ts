@@ -13,6 +13,7 @@ import { GetAuctionDetailUseCase } from '../../application/use-cases/GetAuctionD
 import { CancelAuctionUseCase } from '../../application/use-cases/CancelAuctionUseCase';
 import { PlaceBidUseCase } from '../../application/use-cases/PlaceBidUseCase';
 import { ListCategoriesUseCase } from '../../application/use-cases/ListCategoriesUseCase';
+import { GetPaymentOrderUseCase } from '../../application/use-cases/GetPaymentOrderUseCase';
 import { TokenService } from '../../application/ports/TokenService';
 
 export interface RouterDependencies {
@@ -25,6 +26,7 @@ export interface RouterDependencies {
   cancelAuctionUseCase: CancelAuctionUseCase;
   placeBidUseCase: PlaceBidUseCase;
   listCategoriesUseCase: ListCategoriesUseCase;
+  getPaymentOrderUseCase: GetPaymentOrderUseCase;
   tokenService: TokenService;
 }
 
@@ -43,6 +45,6 @@ export function buildRouter(deps: RouterDependencies): Router {
   router.get('/auctions/:id', asyncHandler(AuctionsController.getAuctionDetail(deps.getAuctionDetailUseCase)));
   router.post('/auctions/:id/cancel', requireAuth, asyncHandler(AuctionsController.cancelAuction(deps.cancelAuctionUseCase)));
   router.post('/auctions/:id/bids', requireAuth, asyncHandler(AuctionsController.placeBid(deps.placeBidUseCase)));
-
+  router.get('/auctions/:id/payment-order', requireAuth, asyncHandler(AuctionsController.getPaymentOrder(deps.getPaymentOrderUseCase)));    
   return router;
 }

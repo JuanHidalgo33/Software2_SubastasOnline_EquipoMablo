@@ -4,8 +4,9 @@ import { ListAuctionsUseCase } from '../../../application/use-cases/ListAuctions
 import { GetAuctionDetailUseCase } from '../../../application/use-cases/GetAuctionDetailUseCase';
 import { CancelAuctionUseCase } from '../../../application/use-cases/CancelAuctionUseCase';
 import { PlaceBidUseCase } from '../../../application/use-cases/PlaceBidUseCase';
+import { GetPaymentOrderUseCase } from '../../../application/use-cases/GetPaymentOrderUseCase';
 import { AuctionStatus } from '../../../domain/entities/Auction';
-import { toAuctionResponse, toBidResponse } from '../mappers';
+import { toAuctionResponse, toBidResponse, toPaymentOrderResponse } from '../mappers';
 import { AuthenticatedRequest } from '../middlewares/authentication';
 
 export function publishAuction(useCase: PublishAuctionUseCase) {
@@ -62,5 +63,12 @@ export function placeBid(useCase: PlaceBidUseCase) {
             amount: req.body.amount,
         });
         res.status(201).json(toBidResponse(bid));
+    };
+}
+
+export function getPaymentOrder(useCase: GetPaymentOrderUseCase) {
+    return async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+        const order = await useCase.execute({ auctionId: req.params.id as string, requesterId: req.userId! });
+        res.status(200).json(toPaymentOrderResponse(order));
     };
 }
