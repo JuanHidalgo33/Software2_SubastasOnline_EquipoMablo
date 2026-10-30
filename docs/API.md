@@ -181,7 +181,7 @@ Respuesta `200`:
 
 `status` es `PENDING`, `CONFIRMED` o `EXPIRED`. Si pasan 48 horas sin confirmación del pago, la orden queda `EXPIRED` y la subasta `DEFAULTED`.
 
-Errores posibles: `RESOURCE_NOT_FOUND` (404, subasta inexistente o sin orden porque sigue abierta, se canceló o quedó abandonada), `FORBIDDEN` (403, si quien consulta no es el ganador), `UNAUTHENTICATED` (401).
+Errores posibles: `RESOURCE_NOT_FOUND` (404, subasta inexistente o sin orden porque sigue abierta, se canceló o quedó desierta), `FORBIDDEN` (403, si quien consulta no es el ganador), `UNAUTHENTICATED` (401).
 
 ---
 ## Pendiente para próximas entregas
