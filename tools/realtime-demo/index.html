@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Subastas - prueba de tiempo real</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Prueba de tiempo real</h1>
+  <p>Abre esta página en dos pestañas, cada una con el token de un usuario distinto, y suscríbelas a la misma subasta.</p>
+
+  <label>Servidor <input id="server" value="ws://localhost:3000/ws"></label>
+  <label>Token JWT (de POST /api/v1/auth/login) <input id="token"></label>
+  <label>Id de la subasta <input id="auctionId"></label>
+  <button id="connect">Conectar y suscribirse</button>
+
+  <div id="log"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
