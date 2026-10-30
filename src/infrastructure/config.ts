@@ -16,4 +16,6 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN ?? '*',
   rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1000),
   rateLimitMax: Number(process.env.RATE_LIMIT_MAX ?? 100),
+  persistence: process.env.PERSISTENCE ?? 'sqlite',
+  databasePath: process.env.DATABASE_PATH ?? './data/auctions.db',
 };
