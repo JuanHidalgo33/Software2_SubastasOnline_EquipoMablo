@@ -127,12 +127,17 @@ export class SqliteAuctionRepository implements AuctionRepository {
 
     if (row.status === 'CANCELLED') {
       auction.cancel(auction.publishedAt, unexpectedId);
-    } else if (row.status === 'AWARDED' || row.status === 'UNSOLD') {
+    } else if (row.status === 'AWARDED' || row.status === 'UNSOLD' || row.status === 'DEFAULTED') {
       const order = this.db
         .prepare('SELECT id, generated_at FROM payment_orders WHERE auction_id = ?')
         .get(row.id) as PaymentOrderRow | undefined;
       const closedAt = order ? new Date(order.generated_at) : auction.closesAt;
       auction.evaluateClosing(closedAt, () => (order ? order.id : unexpectedId()));
+      
+      // RN-20
+      if (row.status === 'DEFAULTED' && auction.paymentOrder) {
+        auction.evaluatePaymentDeadline(auction.paymentOrder.paymentDueAt);
+      }
     }
 
     if (auction.status !== row.status) {
