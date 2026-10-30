@@ -1,0 +1,35 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 760px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+button {
+  margin-top: 12px;
+  padding: 8px 14px;
+}
+
+#log {
+  margin-top: 16px;
+  background: #111;
+  color: #9f9;
+  padding: 12px;
+  height: 320px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+}

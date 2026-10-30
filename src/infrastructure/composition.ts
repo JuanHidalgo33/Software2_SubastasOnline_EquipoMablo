@@ -11,7 +11,6 @@ import { SqliteUserRepository } from './persistence/sqlite/SqliteUserRepository'
 import { SqliteAuctionRepository } from './persistence/sqlite/SqliteAuctionRepository';
 import { SqliteCategoryRepository } from './persistence/sqlite/SqliteCategoryRepository';
 
-
 import { RegisterUserUseCase } from '../application/use-cases/RegisterUserUseCase';
 import { LoginUseCase } from '../application/use-cases/LoginUseCase';
 import { GetProfileUseCase } from '../application/use-cases/GetProfileUseCase';
@@ -23,6 +22,9 @@ import { PlaceBidUseCase } from '../application/use-cases/PlaceBidUseCase';
 import { ListCategoriesUseCase } from '../application/use-cases/ListCategoriesUseCase';
 
 import { ConsoleEventPublisher } from './events/ConsoleEventPublisher';
+import { WebSocketEventPublisher } from './events/WebSocketEventPublisher';
+import { CompositeEventPublisher } from './events/CompositeEventPublisher';
+import { AuctionRealtimeHub } from './realtime/AuctionRealtimeHub';
 import { createApp } from './http/app';
 
 
@@ -46,13 +48,18 @@ function buildRepositories() {
 export function buildApp() {
   const clock = new SystemClock();
   const idGenerator = new UuidIdGenerator();
-  const eventPublisher = new ConsoleEventPublisher();
   const passwordHasher = new BcryptPasswordHasher(config.bcryptSaltRounds);
   const tokenService = new JwtTokenService(config.jwtSecret, config.jwtExpiresIn);
 
+  const realtimeHub = new AuctionRealtimeHub(tokenService);
+  const eventPublisher = new CompositeEventPublisher([
+    new ConsoleEventPublisher(),
+    new WebSocketEventPublisher(realtimeHub, idGenerator),
+  ]);
+
   const { userRepository, auctionRepository, categoryRepository } = buildRepositories();
 
-  return createApp({
+  const app = createApp({
     registerUserUseCase: new RegisterUserUseCase(userRepository, passwordHasher, idGenerator, clock),
     loginUseCase: new LoginUseCase(userRepository, passwordHasher, tokenService),
     getProfileUseCase: new GetProfileUseCase(userRepository, auctionRepository, clock, idGenerator, eventPublisher),
@@ -64,4 +71,6 @@ export function buildApp() {
     listCategoriesUseCase: new ListCategoriesUseCase(categoryRepository),
     tokenService,
   });
+
+  return { app, realtimeHub };
 }
