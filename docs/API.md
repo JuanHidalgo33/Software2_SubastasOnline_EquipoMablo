@@ -87,12 +87,11 @@ Formato de una subasta en las respuestas:
   "totalBids": 1,
   "currentBid": { "id": "…", "auctionId": "…", "userId": "…", "amount": 100000, "date": "..." },
   "bidHistory": [ { "id": "…", "auctionId": "…", "userId": "…", "amount": 100000, "date": "..." } ],
-  "winnerId": null,
-  "paymentOrder": null
+  "winnerId": null
 }
 \`\`\`
 
-`status` es uno de: `OPEN`, `CANCELLED`, `AWARDED`, `UNSOLD`.
+`status` es uno de: `OPEN`, `CANCELLED`, `AWARDED`, `UNSOLD`, `DEFAULTED`.
 
 ### `POST /api/v1/auctions` 🔒 — Publicar una subasta (RF-04)
 
@@ -163,8 +162,29 @@ Otros códigos de rechazo posibles: `AUCTION_CLOSED` (RN-06),
 
 ---
 
+### `GET /api/v1/auctions/:id/payment-order` 🔒 — Orden de pago del ganador (RF-17)
+
+Solo el ganador de la subasta puede consultarla. Si la subasta ya debía cerrarse, se cierra en ese momento (cierre perezoso).
+
+Respuesta `200`:
+```json
+{
+  "id": "…",
+  "auctionId": "…",
+  "winnerId": "…",
+  "amount": 110000,
+  "generatedAt": "2026-01-02T00:00:01.000Z",
+  "paymentDueAt": "2026-01-04T00:00:01.000Z",
+  "status": "PENDING"
+}
+```
+
+`status` es `PENDING`, `CONFIRMED` o `EXPIRED`. Si pasan 48 horas sin confirmación del pago, la orden queda `EXPIRED` y la subasta `DEFAULTED`.
+
+Errores posibles: `RESOURCE_NOT_FOUND` (404, subasta inexistente o sin orden porque sigue abierta, se canceló o quedó abandonada), `FORBIDDEN` (403, si quien consulta no es el ganador), `UNAUTHENTICATED` (401).
+
+---
 ## Pendiente para próximas entregas
 
-- API de WebSockets para tiempo real (RF-12 a RF-16) — Entrega 2.
 - Webhook de la pasarela de pagos (RF-18 a RF-20) — Entrega 2.
 - Aplicación web que consuma esta API — Entrega 3.
