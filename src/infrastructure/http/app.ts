@@ -5,6 +5,7 @@ import { rateLimit } from 'express-rate-limit';
 import { config } from '../config';
 import { errorHandler } from './middlewares/errorHandler';
 import { buildRouter, RouterDependencies } from './routes';
+import { buildApiDocsRouter } from './apiDocs';
 
 export const API_PREFIX = '/api/v1';
 
@@ -24,6 +25,8 @@ export function createApp(dependencies: RouterDependencies): Express {
   );
   app.use(express.json());
 
+  // Documentación ejecutable (Swagger UI) en /api/v1/docs.
+  app.use(`${API_PREFIX}/docs`, buildApiDocsRouter());
   app.use(API_PREFIX, buildRouter(dependencies));
 
   app.use((_req, res) => {
