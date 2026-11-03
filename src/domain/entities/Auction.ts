@@ -5,7 +5,7 @@ import { RejectedBidAttempt } from './RejectedBidAttempt';
 import { PaymentOrder, PAYMENT_DEADLINE_HOURS } from './PaymentOrder';
 import { Bid } from './Bid';
 
-export type AuctionStatus = 'OPEN' | 'CANCELLED' | 'AWARDED' | 'UNSOLD';
+export type AuctionStatus = 'OPEN' | 'CANCELLED' | 'AWARDED' | 'UNSOLD' | 'DEFAULTED';
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const THIRTY_DAYS_MS = 30 * 24 * ONE_HOUR_MS;
@@ -113,6 +113,22 @@ export class Auction {
       paymentDueAt: new Date(now.getTime() + PAYMENT_DEADLINE_HOURS * 60 * 60 * 1000),
       status: 'PENDING',
     };
+  }
+
+  // RN-20:
+  evaluatePaymentDeadline(now: Date): void {
+    if (this.status !== 'AWARDED' || !this.paymentOrder) {
+      return;
+    }
+    if (this.paymentOrder.status !== 'PENDING') {
+      return;
+    }
+    if (now.getTime() < this.paymentOrder.paymentDueAt.getTime()) {
+      return;
+    }
+
+    this.paymentOrder = { ...this.paymentOrder, status: 'EXPIRED' };
+    this.status = 'DEFAULTED';
   }
 
   cancel(now: Date, generateId: () => string): void {

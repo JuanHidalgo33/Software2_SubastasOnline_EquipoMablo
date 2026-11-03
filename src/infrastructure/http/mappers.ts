@@ -42,7 +42,6 @@ export function toAuctionResponse(auction: Auction) {
     currentBid: currentBid ? toBidResponse(currentBid) : null,
     bidHistory: auction.bids.map(toBidResponse),
     winnerId: auction.winnerId ?? null,
-    paymentOrder: auction.paymentOrder ? toPaymentOrderResponse(auction.paymentOrder) : null,
   };
 }
 

@@ -175,4 +175,35 @@ describe('Auction.evaluateClosing', () => {
     expect(auction.status).toBe('AWARDED');
     expect(auction.paymentOrder?.id).toBe(paymentOrderIdAfterFirstClose);
   });
+
+  
+describe('Auction.evaluatePaymentDeadline (RN-20)', () => {
+  function awardedAuction() {
+    const auction = publishTestAuction();
+    auction.placeBid({ userId: 'buyer-1', amount: 100000, date: new Date('2026-01-01T01:00:00.000Z') }, nextId);
+    auction.evaluateClosing(new Date('2026-01-02T00:00:00.000Z'), nextId);
+    return auction;
+  }
+
+  it('keeps the order pending before the 48-hour deadline', () => {
+    const auction = awardedAuction();
+    auction.evaluatePaymentDeadline(new Date('2026-01-03T23:59:59.000Z'));
+    expect(auction.status).toBe('AWARDED');
+    expect(auction.paymentOrder?.status).toBe('PENDING');
+  });
+
+  it('expires the order and defaults the auction once the deadline passes', () => {
+    const auction = awardedAuction();
+    auction.evaluatePaymentDeadline(new Date('2026-01-04T00:00:00.000Z'));
+    expect(auction.status).toBe('DEFAULTED');
+    expect(auction.paymentOrder?.status).toBe('EXPIRED');
+  });
+
+  it('does nothing on an auction that was not awarded', () => {
+    const auction = publishTestAuction();
+    auction.evaluateClosing(new Date('2026-01-02T00:00:00.000Z'), nextId);
+    auction.evaluatePaymentDeadline(new Date('2026-02-01T00:00:00.000Z'));
+    expect(auction.status).toBe('UNSOLD');
+  });
+});
 });

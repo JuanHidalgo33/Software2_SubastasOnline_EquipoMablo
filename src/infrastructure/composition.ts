@@ -10,7 +10,6 @@ import { openDatabase } from './persistence/sqlite/database';
 import { SqliteUserRepository } from './persistence/sqlite/SqliteUserRepository';
 import { SqliteAuctionRepository } from './persistence/sqlite/SqliteAuctionRepository';
 import { SqliteCategoryRepository } from './persistence/sqlite/SqliteCategoryRepository';
-
 import { RegisterUserUseCase } from '../application/use-cases/RegisterUserUseCase';
 import { LoginUseCase } from '../application/use-cases/LoginUseCase';
 import { GetProfileUseCase } from '../application/use-cases/GetProfileUseCase';
@@ -20,13 +19,12 @@ import { GetAuctionDetailUseCase } from '../application/use-cases/GetAuctionDeta
 import { CancelAuctionUseCase } from '../application/use-cases/CancelAuctionUseCase';
 import { PlaceBidUseCase } from '../application/use-cases/PlaceBidUseCase';
 import { ListCategoriesUseCase } from '../application/use-cases/ListCategoriesUseCase';
-
+import { GetPaymentOrderUseCase } from '../application/use-cases/GetPaymentOrderUseCase';
 import { ConsoleEventPublisher } from './events/ConsoleEventPublisher';
 import { WebSocketEventPublisher } from './events/WebSocketEventPublisher';
 import { CompositeEventPublisher } from './events/CompositeEventPublisher';
 import { AuctionRealtimeHub } from './realtime/AuctionRealtimeHub';
 import { createApp } from './http/app';
-
 
 function buildRepositories() {
   if (config.persistence === 'memory') {
@@ -69,6 +67,7 @@ export function buildApp() {
     cancelAuctionUseCase: new CancelAuctionUseCase(auctionRepository, idGenerator, clock, eventPublisher),
     placeBidUseCase: new PlaceBidUseCase(auctionRepository, idGenerator, clock, eventPublisher),
     listCategoriesUseCase: new ListCategoriesUseCase(categoryRepository),
+    getPaymentOrderUseCase: new GetPaymentOrderUseCase(auctionRepository, clock, idGenerator, eventPublisher),
     tokenService,
   });
 

@@ -78,6 +78,19 @@ describe('SqliteAuctionRepository', () => {
     expect(loaded?.paymentOrder?.paymentDueAt).toEqual(auction.paymentOrder?.paymentDueAt);
   });
 
+  it('rebuilds a defaulted auction with its expired order (RN-20)', async () => {
+    const auction = publishAuction();
+    auction.placeBid({ userId: 'bidder-a', amount: 100000, date: at('01:00') }, nextId);
+    auction.evaluateClosing(at('13:00'), nextId);
+    auction.evaluatePaymentDeadline(new Date('2026-01-04T00:00:00.000Z'));
+    await repository.save(auction);
+
+    const loaded = await repository.findById('auction-1');
+
+    expect(loaded?.status).toBe('DEFAULTED');
+    expect(loaded?.paymentOrder?.status).toBe('EXPIRED');
+  });
+
   it('rebuilds cancelled and unsold auctions', async () => {
     const cancelled = publishAuction();
     cancelled.cancel(at('01:00'), nextId);
