@@ -12,17 +12,22 @@
 
 **Descripción:**
 API REST en Node.js, Express y TypeScript para una plataforma de subastas
-en línea. En esta primera entrega implementamos el modelo de dominio
-(las reglas del negocio: publicar una subasta, pujar, cancelar y cerrar) y
-los endpoints de la API, guardando todo en memoria por ahora. Falta lo de
-WebSockets, el webhook de pagos y el frontend, que van en las siguientes
-entregas.
+en línea. Implementa el modelo de dominio (publicar una subasta, pujar,
+cancelar, cerrar y vencer la orden de pago), persistencia en SQLite,
+comunicación en tiempo real por WebSockets (nuevas pujas, avisos de
+superación y cierre), una API versionada bajo `/api/v1` con middlewares de
+seguridad y documentación interactiva con Swagger. El webhook de pagos y
+el frontend van en la siguiente entrega.
 
 **Requerimientos:**
-* Node.js 18+
+* Node.js 20+ (lo exige `better-sqlite3`)
 * TypeScript
 * Express
+* better-sqlite3 (persistencia)
+* ws (WebSockets)
 * jsonwebtoken y bcryptjs (login y contraseñas)
+* helmet, cors y express-rate-limit (seguridad)
+* swagger-ui-express (documentación interactiva)
 * uuid
 * Jest (pruebas)
 
