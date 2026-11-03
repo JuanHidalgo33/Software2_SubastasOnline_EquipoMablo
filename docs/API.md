@@ -2,6 +2,9 @@
 
 > **Documentación interactiva:** con el servidor corriendo, abrir `http://localhost:3000/api/v1/docs` (Swagger UI). La especificación OpenAPI está en `docs/openapi.yaml`.
 
+Esta es una API REST: el cliente pregunta y el servidor responde (ver
+sección 4.6 del enunciado). Todas las rutas están bajo el prefijo `/api/v1`.
+
 Toda respuesta de error tiene esta forma (RNF-13):
 
 \`\`\`json
