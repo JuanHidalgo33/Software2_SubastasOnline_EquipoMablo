@@ -135,8 +135,19 @@ Detalle completo (cuerpos, respuestas, errores) en [`docs/API.md`](docs/API.md).
 
 ## Variables de entorno
 
-Ver `.env.example`. Las importantes son `PORT`, `JWT_SECRET` (obligatoria),
-`JWT_EXPIRES_IN` y `BCRYPT_SALT_ROUNDS`.
+Ver `.env.example`.
+
+| Variable | Para qué | Por defecto |
+|---|---|---|
+| `PORT` | Puerto del servidor | `3000` |
+| `JWT_SECRET` | Firma de los tokens. **Obligatoria** | — |
+| `JWT_EXPIRES_IN` | Duración del token | `2h` |
+| `BCRYPT_SALT_ROUNDS` | Costo del cifrado de contraseñas | `10` |
+| `CORS_ORIGIN` | Sitios que pueden llamar a la API | `*` |
+| `RATE_LIMIT_WINDOW_MS` | Ventana del límite de peticiones | `900000` (15 min) |
+| `RATE_LIMIT_MAX` | Peticiones por IP en esa ventana | `100` |
+| `PERSISTENCE` | `sqlite` o `memory` | `sqlite` |
+| `DATABASE_PATH` | Archivo de la base de datos | `./data/auctions.db` |
 
 ## Flujo de trabajo con Git
 
