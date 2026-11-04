@@ -36,9 +36,23 @@ el frontend van en la siguiente entrega.
 git clone https://github.com/JuanHidalgo33/Software2_SubastasOnline_EquipoMablo.git
 cd Software2_SubastasOnline_EquipoMablo
 npm install
-cp .env.example .env     
+cp .env.example .env
+```
+
+Abrir `.env` y asignar un valor a `JWT_SECRET`, por ejemplo `JWT_SECRET=dev-secret`. Sin ese valor el servidor no arranca.
+
+```bash
 npm run dev
 ```
+
+- API: `http://localhost:3000/api/v1`
+- Documentación interactiva (Swagger): `http://localhost:3000/api/v1/docs`
+- Tiempo real: `ws://localhost:3000/ws`
+
+La base de datos se crea sola en `./data/auctions.db` la primera vez.
+
+En Windows con `cmd`, usar `copy .env.example .env` en lugar de `cp`.
+
 Para producción: `npm run build` y luego `npm start`.
 Para correr las pruebas: `npm test`.
 
