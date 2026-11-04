@@ -47,6 +47,7 @@ export function buildRouter(deps: RouterDependencies): Router {
   router.get('/auctions', validateQuery(listAuctionsQuerySchema), asyncHandler(AuctionsController.listAuctions(deps.listAuctionsUseCase)));
   router.get('/auctions/:id', asyncHandler(AuctionsController.getAuctionDetail(deps.getAuctionDetailUseCase)));
   router.post('/auctions/:id/cancel', requireAuth, asyncHandler(AuctionsController.cancelAuction(deps.cancelAuctionUseCase)));
-  router.post('/auctions/:id/bids', requireAuth, validateBody(placeBidSchema), asyncHandler(AuctionsController.placeBid(deps.placeBidUseCase)));  router.get('/auctions/:id/payment-order', requireAuth, asyncHandler(AuctionsController.getPaymentOrder(deps.getPaymentOrderUseCase)));    
+  router.post('/auctions/:id/bids', requireAuth, validateBody(placeBidSchema), asyncHandler(AuctionsController.placeBid(deps.placeBidUseCase)));  
+  router.get('/auctions/:id/payment-order', requireAuth, asyncHandler(AuctionsController.getPaymentOrder(deps.getPaymentOrderUseCase)));    
   return router;
 }
