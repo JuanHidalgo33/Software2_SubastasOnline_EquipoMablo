@@ -165,6 +165,35 @@ subasta guardada, el repositorio reproduce su historia con los métodos
 públicos del dominio (`publish`, `placeBid`, `cancel`, `evaluateClosing`,
 `evaluatePaymentDeadline`). Así el dominio vuelve a validar cada paso.
 
+## Tiempo real (WebSockets)
+
+Conexión: `ws://localhost:3000/ws?token=<JWT>`, con el token de
+`POST /api/v1/auth/login`. Sin token válido, la conexión se cierra con el
+código `4401`.
+
+El cliente se suscribe a una subasta enviando:
+
+```json
+{ "type": "subscribe", "auctionId": "..." }
+```
+
+Mensajes que envía el servidor:
+
+| Mensaje | Cuándo | A quién |
+|---|---|---|
+| `bid.placed` | Se acepta una puja (incluye `currentAmount`) | Todos los suscritos |
+| `notification` con `BID_OUTBID` | Alguien superó la puja del usuario | Solo al postor superado |
+| `auction.closed` | La subasta se cerró (`AWARDED` o `UNSOLD`) | Todos los suscritos |
+| `notification` con `AUCTION_WON` / `AUCTION_CLOSED` | Al cerrar | Al ganador y al vendedor |
+| `auction.presence` | Alguien se conecta o desconecta | Todos los suscritos |
+
+Los casos de uso publican los hechos del negocio por un puerto de salida
+(`AuctionEventPublisher`) y no conocen la librería de WebSockets (RNF-05).
+Cada evento también se registra en consola (RNF-17).
+
+Para probarlo con dos clientes, abrir `tools/realtime-demo/index.html` en
+dos pestañas, cada una con el token de un usuario distinto.
+
 ## Flujo de trabajo con Git
 
 ### Ramas
