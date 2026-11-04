@@ -11,6 +11,13 @@ Toda respuesta de error tiene esta forma (RNF-13):
 { "code": "CODIGO_DEL_ERROR", "message": "Explicación legible del error." }
 \`\`\`
 
+Antes de llegar al dominio, la API valida el formato de lo que recibe. Si
+falta un campo o tiene un tipo incorrecto, responde `400` con
+`VALIDATION_ERROR` y un mensaje que indica el campo. Si el cuerpo no es un
+JSON válido, responde `400` con `INVALID_JSON`. Las reglas de negocio (por
+ejemplo, el precio mínimo o la duración de una subasta) las sigue validando
+el dominio, con sus propios códigos.
+
 Las rutas marcadas con 🔒 requieren el encabezado
 `Authorization: Bearer <token>`, con el token que devuelve el login.
 
