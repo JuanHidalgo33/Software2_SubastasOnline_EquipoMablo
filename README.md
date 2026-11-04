@@ -76,7 +76,7 @@ src/
                     pujar, etc.). Solo orquestan el dominio, no tienen
                     reglas propias.
 
-    infrastructure/  Todo lo que depende de una tecnología concreta:
+  infrastructure/  Todo lo que depende de una tecnología concreta:
     http/            Rutas, controladores, middlewares y Swagger.
     persistence/     Repositorios en memoria y en SQLite (sqlite/).
     events/          Adaptadores del puerto de eventos: consola,
