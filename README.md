@@ -76,13 +76,23 @@ src/
                     pujar, etc.). Solo orquestan el dominio, no tienen
                     reglas propias.
 
-  infrastructure/  Todo lo que depende de una tecnología concreta:
-    http/            Rutas, controladores y middlewares de Express.
-    persistence/     Repositorios en memoria (un Map).
-    seguridad/       bcrypt y JWT.
-    composicion.ts   Aquí se conecta todo (qué implementación usa cada
-                     puerto). Para cambiar a una base de datos real, solo
-                     se toca este archivo.
+    infrastructure/  Todo lo que depende de una tecnología concreta:
+    http/            Rutas, controladores, middlewares y Swagger.
+    persistence/     Repositorios en memoria y en SQLite (sqlite/).
+    events/          Adaptadores del puerto de eventos: consola,
+                     WebSocket y uno compuesto que reparte a ambos.
+    realtime/        Servidor WebSocket: conexiones y suscripciones.
+    security/        bcrypt y JWT.
+    composition.ts   Aquí se conecta todo (qué implementación usa cada
+                     puerto). Cambiar de base de datos o agregar un
+                     canal de eventos solo toca este archivo.
+
+docs/
+  API.md           Referencia de la API en texto.
+  openapi.yaml     Especificación OpenAPI que sirve Swagger.
+
+tools/
+  realtime-demo/   Página para probar el tiempo real con dos pestañas.
 ```
 
 Casi todas las reglas de negocio (publicación, pujas, cierre, cancelación)
