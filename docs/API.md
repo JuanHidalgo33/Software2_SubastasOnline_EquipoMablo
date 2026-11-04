@@ -7,9 +7,9 @@ sección 4.6 del enunciado). Todas las rutas están bajo el prefijo `/api/v1`.
 
 Toda respuesta de error tiene esta forma (RNF-13):
 
-\`\`\`json
+```json
 { "code": "CODIGO_DEL_ERROR", "message": "Explicación legible del error." }
-\`\`\`
+```
 
 Antes de llegar al dominio, la API valida el formato de lo que recibe. Si
 falta un campo o tiene un tipo incorrecto, responde `400` con
@@ -28,41 +28,41 @@ Las rutas marcadas con 🔒 requieren el encabezado
 ### `POST /api/v1/users` — Registrar un usuario (RF-01)
 
 Cuerpo:
-\`\`\`json
+```json
 { "name": "Ana Gomez", "email": "ana@example.com", "password": "unaClaveSegura123" }
-\`\`\`
+```
 
 Respuesta `201`:
-\`\`\`json
+```json
 { "id": "…", "name": "Ana Gomez", "email": "ana@example.com", "registeredAt": "2026-01-01T00:00:00.000Z" }
-\`\`\`
+```
 
 Errores posibles: `INVALID_EMAIL` (400), `EMAIL_ALREADY_REGISTERED` (400, RN-22).
 
 ### `POST /api/v1/auth/login` — Iniciar sesión (RF-02)
 
 Cuerpo:
-\`\`\`json
+```json
 { "email": "ana@example.com", "password": "unaClaveSegura123" }
-\`\`\`
+```
 
 Respuesta `200`:
-\`\`\`json
+```json
 { "token": "eyJhbGciOi...", "user": { "id": "…", "name": "Ana Gomez", "email": "ana@example.com", "registeredAt": "..." } }
-\`\`\`
+```
 
 Errores posibles: `INVALID_CREDENTIALS` (401).
 
 ### `GET /api/v1/users/profile` 🔒 — Perfil del usuario autenticado (RF-03)
 
 Respuesta `200`:
-\`\`\`json
+```json
 {
   "user": { "id": "…", "name": "Ana Gomez", "email": "ana@example.com", "registeredAt": "..." },
   "publishedAuctions": [ /* subastas, ver formato abajo */ ],
   "participatedAuctions": [ /* subastas en las que este usuario registró al menos una puja */ ]
 }
-\`\`\`
+```
 
 Errores posibles: `UNAUTHENTICATED` (401).
 
@@ -73,16 +73,16 @@ Errores posibles: `UNAUTHENTICATED` (401).
 ### `GET /api/v1/categories` — Listar categorías (apoya el filtro de RF-05)
 
 Respuesta `200`:
-\`\`\`json
+```json
 [ { "id": "cat-electronics", "name": "Electronics" }, { "id": "cat-home", "name": "Home" } ]
-\`\`\`
+```
 
 ---
 
 ## Subastas
 
 Formato de una subasta en las respuestas:
-\`\`\`json
+```json
 {
   "id": "…",
   "sellerId": "…",
@@ -98,14 +98,14 @@ Formato de una subasta en las respuestas:
   "bidHistory": [ { "id": "…", "auctionId": "…", "userId": "…", "amount": 100000, "date": "..." } ],
   "winnerId": null
 }
-\`\`\`
+```
 
 `status` es uno de: `OPEN`, `CANCELLED`, `AWARDED`, `UNSOLD`, `DEFAULTED`.
 
 ### `POST /api/v1/auctions` 🔒 — Publicar una subasta (RF-04)
 
 Cuerpo:
-\`\`\`json
+```json
 {
   "categoryId": "cat-electronics",
   "item": { "name": "Bicycle", "description": "Barely used", "condition": "Good" },
@@ -113,7 +113,7 @@ Cuerpo:
   "minIncrement": 10000,
   "closesAt": "2026-01-02T00:00:00.000Z"
 }
-\`\`\`
+```
 
 Respuesta `201`: la subasta creada (formato de arriba).
 
@@ -128,9 +128,9 @@ Parámetros de consulta, todos opcionales: `categoryId`, `status`
 `pageSize` (por defecto 10).
 
 Respuesta `200`:
-\`\`\`json
+```json
 { "items": [ /* subastas */ ], "page": 1, "pageSize": 10, "totalItems": 3, "totalPages": 1 }
-\`\`\`
+```
 
 ### `GET /api/v1/auctions/:id` — Detalle de una subasta (RF-06)
 
@@ -150,20 +150,20 @@ pide la cancelación no es el vendedor), `AUCTION_NOT_CANCELLABLE` (400).
 ### `POST /api/v1/auctions/:id/bids` 🔒 — Registrar una puja (RF-09, RF-10, RF-11)
 
 Cuerpo:
-\`\`\`json
+```json
 { "amount": 110000 }
-\`\`\`
+```
 
 Respuesta `201` si se aceptó:
-\`\`\`json
+```json
 { "id": "…", "auctionId": "…", "userId": "…", "amount": 110000, "date": "..." }
-\`\`\`
+```
 
 Si se rechaza, la API responde `400` con el motivo exacto (RN-12), por
 ejemplo:
-\`\`\`json
+```json
 { "code": "INSUFFICIENT_BID", "message": "The bid must beat the current one by at least the minimum increment (RN-09)." }
-\`\`\`
+```
 
 Otros códigos de rechazo posibles: `AUCTION_CLOSED` (RN-06),
 `SELLER_CANNOT_BID` (RN-07), `BID_BELOW_BASE_PRICE` (RN-08),
