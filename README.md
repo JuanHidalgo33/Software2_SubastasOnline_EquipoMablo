@@ -246,7 +246,7 @@ Alcances sugeridos: `domain`, `application`, `http`, `ws`, `persistence`.
 
 Ejemplos:
 - `feat(domain): added minimum increment validation to placeBid`
-- `fix(http): returned 422 when a bid is rejected`
+- `fix(domain): rejected auctions with invalid closing date`
 - `test(domain): added tests for auction closing rules`
 
 No se aceptan mensajes genéricos (`changes`, `fix stuff`, `update`) ni
