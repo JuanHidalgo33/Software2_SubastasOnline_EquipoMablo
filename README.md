@@ -119,13 +119,17 @@ y vencimiento del pago) están concentradas en `src/domain/entities/Auction.ts`.
 
 ## Endpoints principales
 
-Todas las rutas van bajo `/api`.
+Todas las rutas van bajo `/api/v1`. Una ruta inexistente responde 404 con el formato `{ code, message }`.
 
 | Recurso | Rutas |
 |---|---|
-| Usuarios / sesión | `POST /users`, `POST /auth/login`, `GET /users/profile`  |
+| Usuarios / sesión | `POST /users`, `POST /auth/login`, `GET /users/profile` |
 | Categorías | `GET /categories` |
-| Subastas | `POST /auctions` , `GET /auctions`, `GET /auctions/:id`, `POST /auctions/:id/cancel` , `POST /auctions/:id/bids`  |
+| Subastas | `POST /auctions`, `GET /auctions`, `GET /auctions/:id`, `POST /auctions/:id/cancel` |
+| Pujas | `POST /auctions/:id/bids` |
+| Pagos | `GET /auctions/:id/payment-order` (solo el ganador) |
+
+Para probarlas desde el navegador, abrir Swagger en `http://localhost:3000/api/v1/docs`.
 
 Detalle completo (cuerpos, respuestas, errores) en [`docs/API.md`](docs/API.md).
 
