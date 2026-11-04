@@ -95,8 +95,9 @@ tools/
   realtime-demo/   Página para probar el tiempo real con dos pestañas.
 ```
 
-Casi todas las reglas de negocio (publicación, pujas, cierre, cancelación)
-están concentradas en `src/domain/entities/Auction.ts`.
+Casi todas las reglas de negocio (publicación, pujas, cierre, cancelación
+y vencimiento del pago) están concentradas en `src/domain/entities/Auction.ts`.
+
 ## Reglas de negocio principales
 
 - **Publicar subasta:** precio base e incremento mínimo mayores que cero;
@@ -112,6 +113,9 @@ están concentradas en `src/domain/entities/Auction.ts`.
 - **Cierre:** al consultar una subasta se revisa si ya debía cerrarse; si
   tuvo pujas se adjudica al mejor postor y se genera una orden de pago; si
   no tuvo pujas queda "desierta". Una subasta solo se cierra una vez.
+- **Pago:** la orden de pago tiene un plazo de 48 horas. Si vence sin
+  confirmación, la orden queda vencida y la subasta en incumplimiento
+  (`DEFAULTED`).
 
 ## Endpoints principales
 
