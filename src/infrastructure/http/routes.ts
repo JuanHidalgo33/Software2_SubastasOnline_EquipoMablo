@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { asyncHandler } from './asyncHandler';
 import { authenticate } from './middlewares/authentication';
+import { validateBody, validateQuery } from './middlewares/validate';
+import {registerUserSchema, loginSchema, publishAuctionSchema, placeBidSchema,
+listAuctionsQuerySchema} from './validation/schemas';
 import * as UsersController from './controllers/UsersController';
 import * as AuctionsController from './controllers/AuctionsController';
 import * as CategoriesController from './controllers/CategoriesController';
@@ -34,17 +37,17 @@ export function buildRouter(deps: RouterDependencies): Router {
   const router = Router();
   const requireAuth = authenticate(deps.tokenService);
 
-  router.post('/users', asyncHandler(UsersController.registerUser(deps.registerUserUseCase)));
-  router.post('/auth/login', asyncHandler(UsersController.login(deps.loginUseCase)));
+  router.post('/users', validateBody(registerUserSchema), asyncHandler(UsersController.registerUser(deps.registerUserUseCase)));
+  router.post('/auth/login', validateBody(loginSchema), asyncHandler(UsersController.login(deps.loginUseCase)));
   router.get('/users/profile', requireAuth, asyncHandler(UsersController.getProfile(deps.getProfileUseCase)));
 
   router.get('/categories', asyncHandler(CategoriesController.listCategories(deps.listCategoriesUseCase)));
 
-  router.post('/auctions', requireAuth, asyncHandler(AuctionsController.publishAuction(deps.publishAuctionUseCase)));
-  router.get('/auctions', asyncHandler(AuctionsController.listAuctions(deps.listAuctionsUseCase)));
+  router.post('/auctions', requireAuth, validateBody(publishAuctionSchema), asyncHandler(AuctionsController.publishAuction(deps.publishAuctionUseCase)));
+  router.get('/auctions', validateQuery(listAuctionsQuerySchema), asyncHandler(AuctionsController.listAuctions(deps.listAuctionsUseCase)));
   router.get('/auctions/:id', asyncHandler(AuctionsController.getAuctionDetail(deps.getAuctionDetailUseCase)));
   router.post('/auctions/:id/cancel', requireAuth, asyncHandler(AuctionsController.cancelAuction(deps.cancelAuctionUseCase)));
-  router.post('/auctions/:id/bids', requireAuth, asyncHandler(AuctionsController.placeBid(deps.placeBidUseCase)));
+  router.post('/auctions/:id/bids', requireAuth, validateBody(placeBidSchema), asyncHandler(AuctionsController.placeBid(deps.placeBidUseCase)));  
   router.get('/auctions/:id/payment-order', requireAuth, asyncHandler(AuctionsController.getPaymentOrder(deps.getPaymentOrderUseCase)));    
   return router;
 }
