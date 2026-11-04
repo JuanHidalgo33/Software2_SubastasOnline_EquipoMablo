@@ -12,17 +12,22 @@
 
 **Descripción:**
 API REST en Node.js, Express y TypeScript para una plataforma de subastas
-en línea. En esta primera entrega implementamos el modelo de dominio
-(las reglas del negocio: publicar una subasta, pujar, cancelar y cerrar) y
-los endpoints de la API, guardando todo en memoria por ahora. Falta lo de
-WebSockets, el webhook de pagos y el frontend, que van en las siguientes
-entregas.
+en línea. Implementa el modelo de dominio (publicar una subasta, pujar,
+cancelar, cerrar y vencer la orden de pago), persistencia en SQLite,
+comunicación en tiempo real por WebSockets (nuevas pujas, avisos de
+superación y cierre), una API versionada bajo `/api/v1` con middlewares de
+seguridad y documentación interactiva con Swagger. El webhook de pagos y
+el frontend van en la siguiente entrega.
 
 **Requerimientos:**
-* Node.js 18+
+* Node.js 20+ (lo exige `better-sqlite3`)
 * TypeScript
 * Express
+* better-sqlite3 (persistencia)
+* ws (WebSockets)
 * jsonwebtoken y bcryptjs (login y contraseñas)
+* helmet, cors y express-rate-limit (seguridad)
+* swagger-ui-express (documentación interactiva)
 * uuid
 * Jest (pruebas)
 
@@ -31,9 +36,23 @@ entregas.
 git clone https://github.com/JuanHidalgo33/Software2_SubastasOnline_EquipoMablo.git
 cd Software2_SubastasOnline_EquipoMablo
 npm install
-cp .env.example .env     
+cp .env.example .env
+```
+
+Abrir `.env` y asignar un valor a `JWT_SECRET`, por ejemplo `JWT_SECRET=dev-secret`. Sin ese valor el servidor no arranca.
+
+```bash
 npm run dev
 ```
+
+- API: `http://localhost:3000/api/v1`
+- Documentación interactiva (Swagger): `http://localhost:3000/api/v1/docs`
+- Tiempo real: `ws://localhost:3000/ws`
+
+La base de datos se crea sola en `./data/auctions.db` la primera vez.
+
+En Windows con `cmd`, usar `copy .env.example .env` en lugar de `cp`.
+
 Para producción: `npm run build` y luego `npm start`.
 Para correr las pruebas: `npm test`.
 
@@ -58,16 +77,27 @@ src/
                     reglas propias.
 
   infrastructure/  Todo lo que depende de una tecnología concreta:
-    http/            Rutas, controladores y middlewares de Express.
-    persistence/     Repositorios en memoria (un Map).
-    seguridad/       bcrypt y JWT.
-    composicion.ts   Aquí se conecta todo (qué implementación usa cada
-                     puerto). Para cambiar a una base de datos real, solo
-                     se toca este archivo.
+    http/            Rutas, controladores, middlewares y Swagger.
+    persistence/     Repositorios en memoria y en SQLite (sqlite/).
+    events/          Adaptadores del puerto de eventos: consola,
+                     WebSocket y uno compuesto que reparte a ambos.
+    realtime/        Servidor WebSocket: conexiones y suscripciones.
+    security/        bcrypt y JWT.
+    composition.ts   Aquí se conecta todo (qué implementación usa cada
+                     puerto). Cambiar de base de datos o agregar un
+                     canal de eventos solo toca este archivo.
+
+docs/
+  API.md           Referencia de la API en texto.
+  openapi.yaml     Especificación OpenAPI que sirve Swagger.
+
+tools/
+  realtime-demo/   Página para probar el tiempo real con dos pestañas.
 ```
 
-Casi todas las reglas de negocio (publicación, pujas, cierre, cancelación)
-están concentradas en `src/domain/entities/Auction.ts`.
+Casi todas las reglas de negocio (publicación, pujas, cierre, cancelación
+y vencimiento del pago) están concentradas en `src/domain/entities/Auction.ts`.
+
 ## Reglas de negocio principales
 
 - **Publicar subasta:** precio base e incremento mínimo mayores que cero;
@@ -83,23 +113,86 @@ están concentradas en `src/domain/entities/Auction.ts`.
 - **Cierre:** al consultar una subasta se revisa si ya debía cerrarse; si
   tuvo pujas se adjudica al mejor postor y se genera una orden de pago; si
   no tuvo pujas queda "desierta". Una subasta solo se cierra una vez.
+- **Pago:** la orden de pago tiene un plazo de 48 horas. Si vence sin
+  confirmación, la orden queda vencida y la subasta en incumplimiento
+  (`DEFAULTED`).
 
 ## Endpoints principales
 
-Todas las rutas van bajo `/api`.
+Todas las rutas van bajo `/api/v1`. Una ruta inexistente responde 404 con el formato `{ code, message }`.
 
 | Recurso | Rutas |
 |---|---|
-| Usuarios / sesión | `POST /users`, `POST /auth/login`, `GET /users/profile`  |
+| Usuarios / sesión | `POST /users`, `POST /auth/login`, `GET /users/profile` |
 | Categorías | `GET /categories` |
-| Subastas | `POST /auctions` , `GET /auctions`, `GET /auctions/:id`, `POST /auctions/:id/cancel` , `POST /auctions/:id/bids`  |
+| Subastas | `POST /auctions`, `GET /auctions`, `GET /auctions/:id`, `POST /auctions/:id/cancel` |
+| Pujas | `POST /auctions/:id/bids` |
+| Pagos | `GET /auctions/:id/payment-order` (solo el ganador) |
+
+Para probarlas desde el navegador, abrir Swagger en `http://localhost:3000/api/v1/docs`.
 
 Detalle completo (cuerpos, respuestas, errores) en [`docs/API.md`](docs/API.md).
 
 ## Variables de entorno
 
-Ver `.env.example`. Las importantes son `PORT`, `JWT_SECRET` (obligatoria),
-`JWT_EXPIRES_IN` y `BCRYPT_SALT_ROUNDS`.
+Ver `.env.example`.
+
+| Variable | Para qué | Por defecto |
+|---|---|---|
+| `PORT` | Puerto del servidor | `3000` |
+| `JWT_SECRET` | Firma de los tokens. **Obligatoria** | — |
+| `JWT_EXPIRES_IN` | Duración del token | `2h` |
+| `BCRYPT_SALT_ROUNDS` | Costo del cifrado de contraseñas | `10` |
+| `CORS_ORIGIN` | Sitios que pueden llamar a la API | `*` |
+| `RATE_LIMIT_WINDOW_MS` | Ventana del límite de peticiones | `900000` (15 min) |
+| `RATE_LIMIT_MAX` | Peticiones por IP en esa ventana | `100` |
+| `PERSISTENCE` | `sqlite` o `memory` | `sqlite` |
+| `DATABASE_PATH` | Archivo de la base de datos | `./data/auctions.db` |
+
+## Persistencia
+
+Los datos se guardan en SQLite (`better-sqlite3`). Elegimos SQLite porque
+no requiere instalar un servidor de base de datos: el proyecto corre con
+`npm install` y `npm run dev` (RNF-11, RNF-18). La base se crea sola al
+arrancar, con las categorías iniciales, y su archivo está ignorado por Git.
+
+La persistencia es un adaptador de los puertos del dominio. Con
+`PERSISTENCE=memory` el sistema vuelve a los repositorios en memoria sin
+cambiar dominio ni aplicación (RNF-06).
+
+El dominio no se modificó para la persistencia: para reconstruir una
+subasta guardada, el repositorio reproduce su historia con los métodos
+públicos del dominio (`publish`, `placeBid`, `cancel`, `evaluateClosing`,
+`evaluatePaymentDeadline`). Así el dominio vuelve a validar cada paso.
+
+## Tiempo real (WebSockets)
+
+Conexión: `ws://localhost:3000/ws?token=<JWT>`, con el token de
+`POST /api/v1/auth/login`. Sin token válido, la conexión se cierra con el
+código `4401`.
+
+El cliente se suscribe a una subasta enviando:
+
+```json
+{ "type": "subscribe", "auctionId": "..." }
+```
+
+Mensajes que envía el servidor:
+
+| Mensaje | Cuándo | A quién |
+|---|---|---|
+| `bid.placed` | Se acepta una puja (incluye `currentAmount`) | Todos los suscritos |
+| `notification` con `BID_OUTBID` | Alguien superó la puja del usuario | Solo al postor superado |
+| `auction.closed` | La subasta se cerró (`AWARDED` o `UNSOLD`) | Todos los suscritos |
+| `notification` con `AUCTION_WON` / `AUCTION_CLOSED` | Al cerrar | Al ganador y al vendedor |
+| `auction.presence` | Alguien se conecta o desconecta | Todos los suscritos |
+
+Los casos de uso publican los hechos del negocio por un puerto de salida
+(`AuctionEventPublisher`) y no conocen la librería de WebSockets (RNF-05).
+Cada evento también se registra en consola (RNF-17).
+
+Para probarlo con dos clientes, abrir `tools/realtime-demo/index.html` en
+dos pestañas, cada una con el token de un usuario distinto.
 
 ## Flujo de trabajo con Git
 
@@ -153,7 +246,7 @@ Alcances sugeridos: `domain`, `application`, `http`, `ws`, `persistence`.
 
 Ejemplos:
 - `feat(domain): added minimum increment validation to placeBid`
-- `fix(http): returned 422 when a bid is rejected`
+- `fix(domain): rejected auctions with invalid closing date`
 - `test(domain): added tests for auction closing rules`
 
 No se aceptan mensajes genéricos (`changes`, `fix stuff`, `update`) ni
