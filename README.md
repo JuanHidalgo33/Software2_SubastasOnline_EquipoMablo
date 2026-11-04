@@ -149,6 +149,22 @@ Ver `.env.example`.
 | `PERSISTENCE` | `sqlite` o `memory` | `sqlite` |
 | `DATABASE_PATH` | Archivo de la base de datos | `./data/auctions.db` |
 
+## Persistencia
+
+Los datos se guardan en SQLite (`better-sqlite3`). Elegimos SQLite porque
+no requiere instalar un servidor de base de datos: el proyecto corre con
+`npm install` y `npm run dev` (RNF-11, RNF-18). La base se crea sola al
+arrancar, con las categorías iniciales, y su archivo está ignorado por Git.
+
+La persistencia es un adaptador de los puertos del dominio. Con
+`PERSISTENCE=memory` el sistema vuelve a los repositorios en memoria sin
+cambiar dominio ni aplicación (RNF-06).
+
+El dominio no se modificó para la persistencia: para reconstruir una
+subasta guardada, el repositorio reproduce su historia con los métodos
+públicos del dominio (`publish`, `placeBid`, `cancel`, `evaluateClosing`,
+`evaluatePaymentDeadline`). Así el dominio vuelve a validar cada paso.
+
 ## Flujo de trabajo con Git
 
 ### Ramas
