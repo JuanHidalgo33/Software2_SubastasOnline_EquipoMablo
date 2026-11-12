@@ -15,4 +15,8 @@ export class InMemoryAuctionRepository implements AuctionRepository {
   async findAll(): Promise<Auction[]> {
     return [...this.auctions.values()];
   }
+
+  async findByPaymentOrderId(paymentOrderId: string): Promise<Auction | undefined> {
+    return [...this.auctions.values()].find((auction) => auction.paymentOrder?.id === paymentOrderId);
+  }
 }
