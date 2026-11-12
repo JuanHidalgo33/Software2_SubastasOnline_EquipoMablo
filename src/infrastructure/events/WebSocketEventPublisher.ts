@@ -12,7 +12,6 @@ export class WebSocketEventPublisher implements AuctionEventPublisher {
   async publish(event: AuctionEvent): Promise<void> {
     switch (event.type) {
       case 'BID_PLACED':
-        // RF-13: nueva puja vigente para todos los suscritos.
         this.hub.broadcastToAuction(event.auctionId, {
           type: 'bid.placed',
           auctionId: event.auctionId,
@@ -24,7 +23,6 @@ export class WebSocketEventPublisher implements AuctionEventPublisher {
         break;
 
       case 'BIDDER_OUTBID':
-        // RF-14: aviso solo para el postor superado.
         this.notify({
           recipientUserId: event.outbidUserId,
           type: 'BID_OUTBID',
@@ -34,7 +32,6 @@ export class WebSocketEventPublisher implements AuctionEventPublisher {
         break;
 
       case 'AUCTION_CLOSED':
-        // RF-15: cierre y resultado para todos los suscritos.
         this.hub.broadcastToAuction(event.auctionId, {
           type: 'auction.closed',
           auctionId: event.auctionId,
@@ -43,7 +40,7 @@ export class WebSocketEventPublisher implements AuctionEventPublisher {
           winningAmount: event.winningAmount,
           occurredAt: event.occurredAt,
         });
-        // Seccion 4.4: se notifica al ganador y al vendedor.
+        
         if (event.winnerId) {
           this.notify({
             recipientUserId: event.winnerId,
@@ -58,6 +55,15 @@ export class WebSocketEventPublisher implements AuctionEventPublisher {
           message: event.result === 'AWARDED'
             ? `Your auction was awarded for ${event.winningAmount}.`
             : 'Your auction closed without bids.',
+          date: event.occurredAt,
+        }, event.auctionId);
+        break;
+
+      case 'PAYMENT_CONFIRMED':
+        this.notify({
+          recipientUserId: event.winnerId,
+          type: 'PAYMENT_CONFIRMED',
+          message: `Your payment of ${event.amount} was confirmed.`,
           date: event.occurredAt,
         }, event.auctionId);
         break;
