@@ -276,6 +276,7 @@ button.secondary:hover:not(:disabled) {
   .card {
     padding: 20px;
   }
+}
 
 .button {
   display: inline-block;
@@ -454,5 +455,4 @@ textarea {
   .form-row {
     grid-template-columns: 1fr;
   }
-}
 }
