@@ -70,7 +70,6 @@ const SCHEMA = `
     received_at       TEXT NOT NULL
   );
 `;
-`;
 
 export function openDatabase(filePath: string): SqliteDatabase {
   if (filePath !== ':memory:') {
