@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { RequireAuth } from './components/RequireAuth';
+import { AuctionDetailPage } from './pages/AuctionDetailPage';
 import { AuctionListPage } from './pages/AuctionListPage';
 import { LoginPage } from './pages/LoginPage';
 import { PublishAuctionPage } from './pages/PublishAuctionPage';
@@ -21,6 +22,7 @@ export default function App() {
             </RequireAuth>
           }
         />
+          <Route path="/auctions/:id" element={<AuctionDetailPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
