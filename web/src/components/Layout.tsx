@@ -19,6 +19,7 @@ export function Layout() {
               <NavLink to="/" end>
                 Auctions
               </NavLink>
+              <NavLink to="/auctions/new">Publish</NavLink>
               <span className="user">{user.name}</span>
               <button type="button" className="secondary" onClick={logout}>
                 Log out
@@ -26,6 +27,9 @@ export function Layout() {
             </>
           ) : (
             <>
+              <NavLink to="/" end>
+                Auctions
+              </NavLink>
               <NavLink to="/login">Log in</NavLink>
               <NavLink to="/register">Sign up</NavLink>
             </>
