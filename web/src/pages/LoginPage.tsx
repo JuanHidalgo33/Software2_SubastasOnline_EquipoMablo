@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 import { useAuth } from '../auth/AuthContext';
 import { ErrorMessage } from '../components/ErrorMessage';
 
@@ -33,8 +34,10 @@ export function LoginPage() {
   }
 
   return (
-    <section className="card narrow">
+    <section className="card narrow auth-card">
+      <img src={logo} alt="Mablo Auctions" className="auth-logo" />
       <h1>Log in</h1>
+      <p className="muted">Welcome back. Log in to bid in real time.</p>
       <form onSubmit={handleSubmit}>
         <label>
           Email

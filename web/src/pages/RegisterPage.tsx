@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 import { useAuth } from '../auth/AuthContext';
 import { ErrorMessage } from '../components/ErrorMessage';
 
@@ -31,8 +32,10 @@ export function RegisterPage() {
   }
 
   return (
-    <section className="card narrow">
+    <section className="card narrow auth-card">
+      <img src={logo} alt="Mablo Auctions" className="auth-logo" />
       <h1>Create account</h1>
+      <p className="muted">Join to publish auctions and place bids.</p>
       <form onSubmit={handleSubmit}>
         <label>
           Name
