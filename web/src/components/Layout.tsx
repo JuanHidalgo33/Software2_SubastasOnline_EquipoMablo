@@ -26,6 +26,9 @@ export function Layout() {
             </>
           ) : (
             <>
+              <NavLink to="/" end>
+                Auctions
+              </NavLink>
               <NavLink to="/login">Log in</NavLink>
               <NavLink to="/register">Sign up</NavLink>
             </>
