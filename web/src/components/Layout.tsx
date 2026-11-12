@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import logo from '../assets/logo.png';
 import { useAuth } from '../auth/AuthContext';
 
 export function Layout() {
@@ -8,14 +9,17 @@ export function Layout() {
     <>
       <header className="topbar">
         <Link to="/" className="brand">
-          Mablo Auctions
+          <img src={logo} alt="" className="brand-logo" />
+          <span>Mablo Auctions</span>
         </Link>
         <nav>
           {user ? (
             <>
-              <NavLink to="/">Auctions</NavLink>
-              <span className="user">Hi, {user.name}</span>
-              <button type="button" className="link" onClick={logout}>
+              <NavLink to="/" end>
+                Auctions
+              </NavLink>
+              <span className="user">{user.name}</span>
+              <button type="button" className="secondary" onClick={logout}>
                 Log out
               </button>
             </>
