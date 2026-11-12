@@ -1,6 +1,5 @@
 import { request } from './client';
-import type { Auction, AuctionPage, AuctionStatus, Item } from './types';
-
+import type { Auction, AuctionPage, AuctionStatus, Bid, Item } from './types';
 export interface AuctionFilters {
   categoryId?: string;
   status?: AuctionStatus;
@@ -28,4 +27,17 @@ export interface PublishAuctionData {
 
 export function publishAuction(data: PublishAuctionData): Promise<Auction> {
   return request<Auction>('/auctions', { method: 'POST', body: data });
+}
+
+
+export function getAuction(id: string): Promise<Auction> {
+  return request<Auction>(`/auctions/${id}`);
+}
+
+export function placeBid(auctionId: string, amount: number): Promise<Bid> {
+  return request<Bid>(`/auctions/${auctionId}/bids`, { method: 'POST', body: { amount } });
+}
+
+export function cancelAuction(auctionId: string): Promise<void> {
+  return request<void>(`/auctions/${auctionId}/cancel`, { method: 'POST' });
 }
