@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import { useAuth } from '../auth/AuthContext';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Layout() {
   const { user, logout } = useAuth();
@@ -29,6 +30,7 @@ export function Layout() {
               <NavLink to="/register">Sign up</NavLink>
             </>
           )}
+          <ThemeToggle />
         </nav>
       </header>
       <main className="container">
