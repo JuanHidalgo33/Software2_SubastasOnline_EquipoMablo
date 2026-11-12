@@ -61,6 +61,15 @@ const SCHEMA = `
     payment_due_at TEXT NOT NULL,
     status         TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS payment_events (
+    id                TEXT PRIMARY KEY,
+    payment_order_id  TEXT NOT NULL REFERENCES payment_orders(id),
+    external_event_id TEXT NOT NULL UNIQUE,
+    result            TEXT NOT NULL,
+    received_at       TEXT NOT NULL
+  );
+`;
 `;
 
 export function openDatabase(filePath: string): SqliteDatabase {
