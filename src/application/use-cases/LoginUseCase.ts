@@ -22,9 +22,8 @@ export class LoginUseCase {
   ) {}
 
   async execute(input: LoginInput): Promise<LoginOutput> {
-    const user = await this.userRepository.findByEmail(input.email);
+    const user = await this.userRepository.findByEmail(input.email.trim().toLowerCase());
 
-    // Mismo error tanto si el correo no existe como si la contraseña no coincide.
     if (!user) {
       throw new ApplicationError('INVALID_CREDENTIALS', 'Email or password is incorrect.', 401);
     }
