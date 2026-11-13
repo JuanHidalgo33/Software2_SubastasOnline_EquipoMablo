@@ -611,3 +611,38 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+.payment-order {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid var(--border);
+  background: var(--bg);
+}
+
+.payment-order .facts {
+  margin-top: 8px;
+}
+
+.payment-pending {
+  border-left-color: var(--accent);
+}
+
+.payment-confirmed {
+  border-left-color: var(--accent);
+  background: var(--primary-soft);
+  color: var(--on-soft);
+}
+
+.payment-expired {
+  border-left-color: var(--error-text);
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+
+.order-id {
+  color: var(--muted);
+  font-size: 0.75rem;
+  word-break: break-all;
+}
