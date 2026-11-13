@@ -44,4 +44,4 @@ export function getPaymentOrder(auctionId: string): Promise<PaymentOrder> {
 
 export function cancelAuction(auctionId: string): Promise<void> {
   return request<void>(`/auctions/${auctionId}/cancel`, { method: 'POST' });
-}
+}

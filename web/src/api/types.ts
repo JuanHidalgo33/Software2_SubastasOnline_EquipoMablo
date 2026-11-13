@@ -65,4 +65,4 @@ export interface AuctionPage {
   pageSize: number;
   totalItems: number;
   totalPages: number;
-}
+}
