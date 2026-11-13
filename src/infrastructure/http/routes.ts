@@ -3,10 +3,12 @@ import { asyncHandler } from './asyncHandler';
 import { authenticate } from './middlewares/authentication';
 import { validateBody, validateQuery } from './middlewares/validate';
 import {registerUserSchema, loginSchema, publishAuctionSchema, placeBidSchema,
-listAuctionsQuerySchema} from './validation/schemas';
+listAuctionsQuerySchema, paymentNotificationSchema} from './validation/schemas';
+import { verifyWebhookSignature } from './middlewares/verifyWebhookSignature';
 import * as UsersController from './controllers/UsersController';
 import * as AuctionsController from './controllers/AuctionsController';
 import * as CategoriesController from './controllers/CategoriesController';
+import * as PaymentsController from './controllers/PaymentsController';
 import { RegisterUserUseCase } from '../../application/use-cases/RegisterUserUseCase';
 import { LoginUseCase } from '../../application/use-cases/LoginUseCase';
 import { GetProfileUseCase } from '../../application/use-cases/GetProfileUseCase';
@@ -17,6 +19,7 @@ import { CancelAuctionUseCase } from '../../application/use-cases/CancelAuctionU
 import { PlaceBidUseCase } from '../../application/use-cases/PlaceBidUseCase';
 import { ListCategoriesUseCase } from '../../application/use-cases/ListCategoriesUseCase';
 import { GetPaymentOrderUseCase } from '../../application/use-cases/GetPaymentOrderUseCase';
+import { HandlePaymentNotificationUseCase } from '../../application/use-cases/HandlePaymentNotificationUseCase';
 import { TokenService } from '../../application/ports/TokenService';
 
 export interface RouterDependencies {
@@ -30,7 +33,9 @@ export interface RouterDependencies {
   placeBidUseCase: PlaceBidUseCase;
   listCategoriesUseCase: ListCategoriesUseCase;
   getPaymentOrderUseCase: GetPaymentOrderUseCase;
+  handlePaymentNotificationUseCase: HandlePaymentNotificationUseCase;
   tokenService: TokenService;
+  paymentWebhookSecret: string;
 }
 
 export function buildRouter(deps: RouterDependencies): Router {
@@ -48,6 +53,14 @@ export function buildRouter(deps: RouterDependencies): Router {
   router.get('/auctions/:id', asyncHandler(AuctionsController.getAuctionDetail(deps.getAuctionDetailUseCase)));
   router.post('/auctions/:id/cancel', requireAuth, asyncHandler(AuctionsController.cancelAuction(deps.cancelAuctionUseCase)));
   router.post('/auctions/:id/bids', requireAuth, validateBody(placeBidSchema), asyncHandler(AuctionsController.placeBid(deps.placeBidUseCase)));  
-  router.get('/auctions/:id/payment-order', requireAuth, asyncHandler(AuctionsController.getPaymentOrder(deps.getPaymentOrderUseCase)));    
+  router.get('/auctions/:id/payment-order', requireAuth, asyncHandler(AuctionsController.getPaymentOrder(deps.getPaymentOrderUseCase)));
+
+  router.post(
+    '/payments/webhook',
+    verifyWebhookSignature(deps.paymentWebhookSecret),
+    validateBody(paymentNotificationSchema),
+    asyncHandler(PaymentsController.receivePaymentNotification(deps.handlePaymentNotificationUseCase)),
+  );
+
   return router;
 }
