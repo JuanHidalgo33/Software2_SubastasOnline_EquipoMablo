@@ -1,9 +1,5 @@
 import { z } from 'zod';
 
-// Validación de FORMATO en el borde de la API (RNF-03).
-// Solo revisa que lleguen los campos con el tipo correcto. Las reglas de negocio
-// se validan en el dominio.
-
 const requiredText = (field: string) =>
   z.string({ required_error: `${field} is required.`, invalid_type_error: `${field} must be a text.` })
     .trim()
