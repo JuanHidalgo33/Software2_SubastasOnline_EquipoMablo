@@ -20,6 +20,7 @@ import { CancelAuctionUseCase } from '../application/use-cases/CancelAuctionUseC
 import { PlaceBidUseCase } from '../application/use-cases/PlaceBidUseCase';
 import { ListCategoriesUseCase } from '../application/use-cases/ListCategoriesUseCase';
 import { GetPaymentOrderUseCase } from '../application/use-cases/GetPaymentOrderUseCase';
+import { HandlePaymentNotificationUseCase } from '../application/use-cases/HandlePaymentNotificationUseCase';
 import { ConsoleEventPublisher } from './events/ConsoleEventPublisher';
 import { WebSocketEventPublisher } from './events/WebSocketEventPublisher';
 import { CompositeEventPublisher } from './events/CompositeEventPublisher';
@@ -68,7 +69,9 @@ export function buildApp() {
     placeBidUseCase: new PlaceBidUseCase(auctionRepository, idGenerator, clock, eventPublisher),
     listCategoriesUseCase: new ListCategoriesUseCase(categoryRepository),
     getPaymentOrderUseCase: new GetPaymentOrderUseCase(auctionRepository, clock, idGenerator, eventPublisher),
+    handlePaymentNotificationUseCase: new HandlePaymentNotificationUseCase(auctionRepository, idGenerator, clock, eventPublisher),
     tokenService,
+    paymentWebhookSecret: config.paymentWebhookSecret,
   });
 
   return { app, realtimeHub };
