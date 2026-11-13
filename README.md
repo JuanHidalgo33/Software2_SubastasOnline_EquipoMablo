@@ -30,7 +30,6 @@ Swagger. El frontend es una aplicación web en React que consume esa API
 * jsonwebtoken y bcryptjs (login y contraseñas)
 * helmet, cors y express-rate-limit (seguridad)
 * swagger-ui-express (documentación interactiva)
-* uuid
 * Jest (pruebas)
 * Frontend: React 19, Vite y react-router-dom (en `web/`, con su propio `package.json`)
 
