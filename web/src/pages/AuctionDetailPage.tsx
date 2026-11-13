@@ -4,6 +4,7 @@ import { cancelAuction, getAuction, placeBid } from '../api/auctions';
 import type { Auction } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { PaymentOrderCard } from '../components/PaymentOrderCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { Toasts, type Toast } from '../components/Toasts';
 import { formatRemaining, useCountdown } from '../hooks/useCountdown';
@@ -32,6 +33,7 @@ export function AuctionDetailPage() {
   const [bidSuccess, setBidSuccess] = useState('');
   const [sending, setSending] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [paymentRefresh, setPaymentRefresh] = useState(0);
 
   const reload = useCallback(async () => {
     try {
@@ -57,6 +59,9 @@ export function AuctionDetailPage() {
       }
       if (message.type === 'notification') {
         const { notification } = message;
+        if (notification.type === 'PAYMENT_CONFIRMED') {
+          setPaymentRefresh((current) => current + 1);
+        }
         setToasts((current) => [
           ...current,
           { id: notification.id, title: NOTIFICATION_TITLES[notification.type], message: notification.message },
@@ -174,6 +179,10 @@ export function AuctionDetailPage() {
             </p>
           )}
 
+          {isWinner && (auction.status === 'AWARDED' || auction.status === 'DEFAULTED') && (
+            <PaymentOrderCard auctionId={auction.id} refreshKey={paymentRefresh} />
+          )}
+
           {isOpen && !user && (
             <p className="muted">
               <Link to="/login">Log in</Link> to bid and receive live updates.
@@ -235,4 +244,4 @@ export function AuctionDetailPage() {
       </section>
     </>
   );
-}
+}
