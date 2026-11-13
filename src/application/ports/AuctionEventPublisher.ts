@@ -27,7 +27,16 @@ export interface AuctionClosedEvent {
   occurredAt: Date;
 }
 
-export type AuctionEvent = BidPlacedEvent | BidderOutbidEvent | AuctionClosedEvent;
+export interface PaymentConfirmedEvent {
+  type: 'PAYMENT_CONFIRMED';
+  auctionId: string;
+  paymentOrderId: string;
+  winnerId: string;
+  amount: number;
+  occurredAt: Date;
+}
+
+export type AuctionEvent = BidPlacedEvent | BidderOutbidEvent | AuctionClosedEvent | PaymentConfirmedEvent;
 
 export interface AuctionEventPublisher {
   publish(event: AuctionEvent): Promise<void>;

@@ -195,6 +195,41 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /payments/webhook:
+    post:
+      tags: [Pagos]
+      summary: Notificación de la pasarela de pagos (RF-18 a RF-20)
+      description: |
+        Lo llama la pasarela, no un usuario, por eso no usa JWT.
+        El cuerpo se firma con HMAC-SHA256 y el secreto `PAYMENT_WEBHOOK_SECRET`; la firma va en la cabecera
+        `X-Signature: sha256=<hex>`. Sin firma válida se responde 401 y no se cambia nada (RN-18).
+        Cada `eventId` se procesa una sola vez; si llega repetido se responde 200 con `DUPLICATE` (RN-19).
+        Para probarlo usa `npm run gateway:pay -- <paymentOrderId>`.
+      parameters:
+        - name: X-Signature
+          in: header
+          required: true
+          schema: { type: string, example: sha256=3f5a... }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentNotification' }
+      responses:
+        '200':
+          description: Notificación procesada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentNotificationResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401':
+          description: Firma ausente o inválida
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { code: INVALID_SIGNATURE, message: The notification signature is not valid. }
+        '404': { $ref: '#/components/responses/NotFound' }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -368,3 +403,17 @@ components:
         generatedAt: { type: string, format: date-time }
         paymentDueAt: { type: string, format: date-time }
         status: { type: string, enum: [PENDING, CONFIRMED, EXPIRED] }
+
+    PaymentNotification:
+      type: object
+      required: [eventId, paymentOrderId, result]
+      properties:
+        eventId: { type: string, example: evt-123 }
+        paymentOrderId: { type: string }
+        result: { type: string, enum: [SUCCESSFUL, FAILED] }
+
+    PaymentNotificationResult:
+      type: object
+      properties:
+        outcome: { type: string, enum: [CONFIRMED, RECORDED, DUPLICATE] }
+        paymentOrderStatus: { type: string, enum: [PENDING, CONFIRMED, EXPIRED] }

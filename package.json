@@ -7,7 +7,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/infrastructure/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/infrastructure/server.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "gateway:pay": "node tools/payment-gateway/send-notification.js"
   },
   "repository": {
     "type": "git",

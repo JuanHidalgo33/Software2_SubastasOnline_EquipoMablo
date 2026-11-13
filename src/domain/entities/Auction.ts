@@ -4,8 +4,11 @@ import { Item } from './Item';
 import { RejectedBidAttempt } from './RejectedBidAttempt';
 import { PaymentOrder, PAYMENT_DEADLINE_HOURS } from './PaymentOrder';
 import { Bid } from './Bid';
+import { PaymentEvent } from './PaymentEvent';
 
 export type AuctionStatus = 'OPEN' | 'CANCELLED' | 'AWARDED' | 'UNSOLD' | 'DEFAULTED';
+
+export type PaymentOutcome = 'CONFIRMED' | 'RECORDED' | 'DUPLICATE';
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const THIRTY_DAYS_MS = 30 * 24 * ONE_HOUR_MS;
@@ -28,6 +31,7 @@ export class Auction {
 
   private readonly bidHistory: Bid[] = [];
   private readonly rejectedAttempts: RejectedBidAttempt[] = [];
+  private readonly paymentEvents: PaymentEvent[] = [];
 
   private constructor(
     public readonly id: string,
@@ -82,6 +86,10 @@ export class Auction {
     return this.rejectedAttempts;
   }
 
+  get payments(): ReadonlyArray<PaymentEvent> {
+    return this.paymentEvents;
+  }
+
   currentBid(): Bid | undefined {
     return this.bidHistory[this.bidHistory.length - 1];
   }
@@ -129,6 +137,25 @@ export class Auction {
 
     this.paymentOrder = { ...this.paymentOrder, status: 'EXPIRED' };
     this.status = 'DEFAULTED';
+  }
+
+  // RN-17, RN-19: solo la pasarela confirma el pago y cada notificación se procesa una sola vez.
+  registerPayment(event: PaymentEvent): PaymentOutcome {
+    if (this.paymentEvents.some((stored) => stored.externalEventId === event.externalEventId)) {
+      return 'DUPLICATE';
+    }
+    if (!this.paymentOrder || this.paymentOrder.id !== event.paymentOrderId) {
+      throw new DomainError('PAYMENT_ORDER_MISMATCH', 'The notification does not belong to this auction payment order.');
+    }
+
+    this.paymentEvents.push(event);
+
+    if (event.result !== 'SUCCESSFUL' || this.paymentOrder.status !== 'PENDING') {
+      return 'RECORDED';
+    }
+
+    this.paymentOrder = { ...this.paymentOrder, status: 'CONFIRMED' };
+    return 'CONFIRMED';
   }
 
   cancel(now: Date, generateId: () => string): void {

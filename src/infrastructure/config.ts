@@ -11,6 +11,7 @@ function required(name: string): string {
 export const config = {
   port: Number(process.env.PORT ?? 3000),
   jwtSecret: required('JWT_SECRET'),
+  paymentWebhookSecret: required('PAYMENT_WEBHOOK_SECRET'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '2h',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS ?? 10),
   corsOrigin: process.env.CORS_ORIGIN ?? '*',

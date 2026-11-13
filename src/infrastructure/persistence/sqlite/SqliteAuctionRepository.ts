@@ -30,6 +30,14 @@ interface PaymentOrderRow {
   generated_at: string;
 }
 
+interface PaymentEventRow {
+  id: string;
+  payment_order_id: string;
+  external_event_id: string;
+  result: 'SUCCESSFUL' | 'FAILED';
+  received_at: string;
+}
+
 export class SqliteAuctionRepository implements AuctionRepository {
   constructor(private readonly db: SqliteDatabase) {}
 
@@ -91,6 +99,16 @@ export class SqliteAuctionRepository implements AuctionRepository {
             order.generatedAt.toISOString(), order.paymentDueAt.toISOString(), order.status,
           );
       }
+
+      const insertPayment = this.db.prepare(
+        `INSERT OR IGNORE INTO payment_events (id, payment_order_id, external_event_id, result, received_at)
+         VALUES (?, ?, ?, ?, ?)`,
+      );
+      for (const payment of auction.payments) {
+        insertPayment.run(
+          payment.id, payment.paymentOrderId, payment.externalEventId, payment.result, payment.receivedAt.toISOString(),
+        );
+      }
     });
 
     saveAll();
@@ -104,6 +122,13 @@ export class SqliteAuctionRepository implements AuctionRepository {
   async findAll(): Promise<Auction[]> {
     const rows = this.db.prepare('SELECT * FROM auctions ORDER BY published_at DESC').all() as AuctionRow[];
     return rows.map((row) => this.rebuild(row));
+  }
+
+  async findByPaymentOrderId(paymentOrderId: string): Promise<Auction | undefined> {
+    const row = this.db
+      .prepare('SELECT a.* FROM auctions a JOIN payment_orders p ON p.auction_id = a.id WHERE p.id = ?')
+      .get(paymentOrderId) as AuctionRow | undefined;
+    return row ? this.rebuild(row) : undefined;
   }
 
   private rebuild(row: AuctionRow): Auction {
@@ -133,8 +158,22 @@ export class SqliteAuctionRepository implements AuctionRepository {
         .get(row.id) as PaymentOrderRow | undefined;
       const closedAt = order ? new Date(order.generated_at) : auction.closesAt;
       auction.evaluateClosing(closedAt, () => (order ? order.id : unexpectedId()));
-      
-      // RN-20
+
+      const payments = this.db
+        .prepare('SELECT * FROM payment_events WHERE payment_order_id = ? ORDER BY received_at ASC')
+        .all(order ? order.id : '') as PaymentEventRow[];
+      for (const payment of payments) {
+        const receivedAt = new Date(payment.received_at);
+        auction.evaluatePaymentDeadline(receivedAt);
+        auction.registerPayment({
+          id: payment.id,
+          paymentOrderId: payment.payment_order_id,
+          externalEventId: payment.external_event_id,
+          result: payment.result,
+          receivedAt,
+        });
+      }
+
       if (row.status === 'DEFAULTED' && auction.paymentOrder) {
         auction.evaluatePaymentDeadline(auction.paymentOrder.paymentDueAt);
       }

@@ -23,9 +23,14 @@ export function createApp(dependencies: RouterDependencies): Express {
       message: { code: 'TOO_MANY_REQUESTS', message: 'Too many requests, please try again later.' },
     }),
   );
-  app.use(express.json());
+  app.use(
+    express.json({
+      verify: (req, _res, buffer) => {
+        Object.assign(req, { rawBody: buffer });
+      },
+    }),
+  );
 
-  // Documentación ejecutable (Swagger UI) en /api/v1/docs.
   app.use(`${API_PREFIX}/docs`, buildApiDocsRouter());
   app.use(API_PREFIX, buildRouter(dependencies));
 
