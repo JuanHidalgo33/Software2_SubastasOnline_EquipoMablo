@@ -193,7 +193,44 @@ Respuesta `200`:
 Errores posibles: `RESOURCE_NOT_FOUND` (404, subasta inexistente o sin orden porque sigue abierta, se canceló o quedó desierta), `FORBIDDEN` (403, si quien consulta no es el ganador), `UNAUTHENTICATED` (401).
 
 ---
-## Pendiente para próximas entregas
+## Webhook de pagos
 
-- Webhook de la pasarela de pagos (RF-18 a RF-20) — Entrega 2.
-- Aplicación web que consuma esta API — Entrega 3.
+### `POST /payments/webhook`
+
+Recibe la notificación de la pasarela de pagos (RF-18 a RF-20). No usa JWT: se autentica con una firma HMAC-SHA256 del cuerpo exacto de la petición, calculada con `PAYMENT_WEBHOOK_SECRET`.
+
+Encabezado:
+
+```
+X-Signature: sha256=<hex>
+```
+
+Cuerpo:
+
+```json
+{
+  "eventId": "evt-123",
+  "paymentOrderId": "…",
+  "result": "SUCCESSFUL"
+}
+```
+
+`result` es `SUCCESSFUL` o `FAILED`.
+
+Respuesta `200`:
+
+```json
+{
+  "outcome": "CONFIRMED",
+  "paymentOrderStatus": "CONFIRMED"
+}
+```
+
+`outcome` puede ser:
+- `CONFIRMED`: pago exitoso, la orden pasa de `PENDING` a `CONFIRMED` y se notifica al ganador por WebSocket (`PAYMENT_CONFIRMED`).
+- `RECORDED`: el evento se guardó pero no cambia la orden (pago fallido, o la orden ya no estaba `PENDING`).
+- `DUPLICATE`: ya se había recibido un evento con ese `eventId`; no se procesa de nuevo (idempotencia, RN-19).
+
+Errores posibles: `INVALID_SIGNATURE` (401, firma ausente o incorrecta), `VALIDATION_ERROR` (400), `RESOURCE_NOT_FOUND` (404, no existe una orden con ese id).
+
+Para simular la pasarela: `npm run gateway:pay -- <paymentOrderId> [SUCCESSFUL|FAILED] [--event <id>] [--bad-signature]`.
