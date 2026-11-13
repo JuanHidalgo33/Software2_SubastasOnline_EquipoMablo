@@ -49,3 +49,12 @@ export const listAuctionsQuerySchema = z.object({
   page: z.coerce.number({ invalid_type_error: 'page must be a number.' }).int('page must be a whole number.').min(1, 'page must be 1 or greater.').optional(),
   pageSize: z.coerce.number({ invalid_type_error: 'pageSize must be a number.' }).int('pageSize must be a whole number.').min(1, 'pageSize must be 1 or greater.').max(100, 'pageSize cannot exceed 100.').optional(),
 });
+
+export const paymentNotificationSchema = z.object({
+  eventId: requiredText('eventId'),
+  paymentOrderId: requiredText('paymentOrderId'),
+  result: z.enum(['SUCCESSFUL', 'FAILED'], {
+    required_error: 'result is required.',
+    invalid_type_error: 'result must be SUCCESSFUL or FAILED.',
+  }),
+});
