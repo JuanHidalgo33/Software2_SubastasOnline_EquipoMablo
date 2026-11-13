@@ -1,5 +1,5 @@
 import { request } from './client';
-import type { Auction, AuctionPage, AuctionStatus, Bid, Item } from './types';
+import type { Auction, AuctionPage, AuctionStatus, Bid, Item, PaymentOrder } from './types';
 export interface AuctionFilters {
   categoryId?: string;
   status?: AuctionStatus;
@@ -38,6 +38,10 @@ export function placeBid(auctionId: string, amount: number): Promise<Bid> {
   return request<Bid>(`/auctions/${auctionId}/bids`, { method: 'POST', body: { amount } });
 }
 
+export function getPaymentOrder(auctionId: string): Promise<PaymentOrder> {
+  return request<PaymentOrder>(`/auctions/${auctionId}/payment-order`);
+}
+
 export function cancelAuction(auctionId: string): Promise<void> {
   return request<void>(`/auctions/${auctionId}/cancel`, { method: 'POST' });
-}
+}

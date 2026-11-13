@@ -47,10 +47,22 @@ export interface Auction {
   winnerId: string | null;
 }
 
+export type PaymentOrderStatus = 'PENDING' | 'CONFIRMED' | 'EXPIRED';
+
+export interface PaymentOrder {
+  id: string;
+  auctionId: string;
+  winnerId: string;
+  amount: number;
+  generatedAt: string;
+  paymentDueAt: string;
+  status: PaymentOrderStatus;
+}
+
 export interface AuctionPage {
   items: Auction[];
   page: number;
   pageSize: number;
   totalItems: number;
   totalPages: number;
-}
+}
